@@ -2,10 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>Stripe Payment Page Sample</title>
-    <meta name="description" content="A demo of Stripe Payment Intents" />
+    <title>Stripe Payment Page Recipe</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="A demo of Stripe Billing" />
 
-    <link rel="icon" href="favicon.ico" type="image/x-icon" />
     <link rel="stylesheet" href="css/normalize.css" />
     <link rel="stylesheet" href="css/global.css" />
     <script src="https://js.stripe.com/v3/"></script>
@@ -20,7 +20,7 @@
         </header>
         <div class="sr-payment-summary payment-view">
           <h1 class="order-amount">$14.00</h1>
-          <h4>Includes <span class="tax-amount">$0.00</span> sales tax</h4>
+          <h4>Subscribe to the 3 photo plan</h4>
         </div>        
         <div class="sr-payment-form payment-view">
           <div class="sr-form-row">
@@ -31,8 +31,8 @@
               <div class="sr-combo-inputs-row">
                 <input
                   type="text"
-                  id="name"
-                  placeholder="Name"
+                  id="email"
+                  placeholder="Email"
                   autocomplete="cardholder"
                   class="sr-input"
                 />
@@ -43,15 +43,15 @@
             </div>
             <div class="sr-field-error" id="card-errors" role="alert"></div>
           </div>
-          <button id="submit">Submit Payment</button>
+          <button id="submit">Subscribe</button>
           <div class="sr-legal-text">
             Your card will be immediately charged <span class="order-total">$14.00</span>.
           </div>
         </div>
         <div class="sr-payment-summary hidden completed-view">
-          <h1>Your test payment <span class="order-status"></span></h1>
+          <h1>Your subscription is <span class="order-status"></span></h1>
           <h4>
-            View PaymentIntent response:</a>
+            View subscription response:</a>
           </h4>
         </div>
         <div class="sr-section hidden completed-view">
@@ -60,6 +60,7 @@
   
             </pre>
           </div>
+          <button onclick="window.location.href='/'">Restart demo</button>
         </div>  
       </div>
       <div class="sr-content">
