@@ -29,7 +29,7 @@ def get_index():
 def get_boostrap():
     return jsonify(
         publicKey=os.getenv('STRIPE_PUBLIC_KEY'),
-        planIds=[os.getenv('SUBSCRIPTION_PLAN_ID')]
+        planIds=os.getenv('SUBSCRIPTION_PLAN_ID').split(',')
     )
 
 @app.route('/create-customer', methods=['POST'])
@@ -38,6 +38,11 @@ def create_customer():
     data = json.loads(request.data)
     paymentMethod = data['payment_method']
     print(paymentMethod)
+    planIds = data['plan_ids']
+    print(planIds)
+    allPlanIds = os.getenv('SUBSCRIPTION_PLAN_ID').split(',')
+    premiumCouponId = os.getenv('PREMIUM_COUPON_ID')
+    coupon = premiumCouponId if len(planIds) == len(allPlanIds) else None
     try:
         # This creates a new Customer and attaches the PaymentMethod in one API call.
         customer = stripe.Customer.create(
@@ -54,12 +59,9 @@ def create_customer():
         # Subscribe the user to the subscription created
         subscription = stripe.Subscription.create(
             customer=customer.id,
-            items=[
-                {
-                    "plan": os.getenv("SUBSCRIPTION_PLAN_ID"),
-                },
-            ],
-            expand=["latest_invoice.payment_intent"]
+            items=[{"plan": planId} for planId in planIds],
+            expand=["latest_invoice.payment_intent"],
+            coupon=coupon
         )
         return jsonify(subscription)
     except Exception as e:

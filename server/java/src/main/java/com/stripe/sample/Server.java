@@ -34,6 +34,8 @@ public class Server {
         String paymentMethod;
         @SerializedName("email")
         String email;
+        @SerializedName("plan_ids")
+        String[] planIds;
 
         public String getPaymentMethod() {
             return paymentMethod;
@@ -68,7 +70,10 @@ public class Server {
             JsonObject payload = new JsonObject();
             payload.addProperty("publicKey", dotenv.get("STRIPE_PUBLIC_KEY"));
             JsonArray planIds = new JsonArray();
-            planIds.add(new JsonPrimitive(dotenv.get("SUBSCRIPTION_PLAN_ID")));
+            for (String planId : dotenv.get("SUBSCRIPTION_PLAN_ID").split(",")) {
+                planIds.add(new JsonPrimitive(planId));
+            }
+
             payload.add("planIds", planIds);
             return payload.toString();
         });
@@ -87,11 +92,17 @@ public class Server {
 
             Customer customer = Customer.create(customerParams);
 
+            String[] allPlanIds = dotenv.get("SUBSCRIPTION_PLAN_ID").split(",");
+            String premiumCouponId = dotenv.get("PREMIUM_COUPON_ID");
+            String couponId = postBody.planIds.length == allPlanIds.length ? premiumCouponId : null;
+
             // Subscribe customer to a plan
-            Map<String, Object> item = new HashMap<>();
-            item.put("plan", dotenv.get("SUBSCRIPTION_PLAN_ID"));
             Map<String, Object> items = new HashMap<>();
-            items.put("0", item);
+            for (int i = 0; i < postBody.planIds.length; i++) {
+                Map<String, Object> item = new HashMap<>();
+                item.put("plan", postBody.planIds[i]);
+                items.put(Integer.toString(i), item);
+            }
 
             Map<String, Object> expand = new HashMap<>();
             expand.put("0", "latest_invoice.payment_intent");
@@ -99,6 +110,7 @@ public class Server {
             params.put("customer", customer.getId());
             params.put("items", items);
             params.put("expand", expand);
+            params.put("coupon", couponId);
             Subscription subscription = Subscription.create(params);
 
             return subscription.toJson();

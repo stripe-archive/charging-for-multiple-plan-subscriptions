@@ -89,6 +89,8 @@ function createCustomer(paymentMethod, cardholderEmail, planIds) {
 function handleSubscription(subscription) {
   if (
     subscription &&
+    subscription.latest_invoice &&
+    subscription.latest_invoice.payment_intent &&
     subscription.latest_invoice.payment_intent.status === 'requires_action'
   ) {
     stripe
@@ -98,6 +100,9 @@ function handleSubscription(subscription) {
       .then(function(result) {
         confirmSubscription(subscription.id);
       });
+  } else if (subscription) {
+    confirmSubscription(subscription.id);
+    orderComplete(subscription);
   } else {
     orderComplete(subscription);
   }
