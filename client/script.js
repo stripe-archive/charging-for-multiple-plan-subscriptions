@@ -1,7 +1,9 @@
 var stripe;
+var allPlanIds;
 
-var stripeElements = function(publicKey) {
+var stripeElements = function(publicKey, planIds) {
   stripe = Stripe(publicKey);
+  allPlanIds = planIds;
   var elements = stripe.elements();
 
   // Element styles
@@ -59,12 +61,12 @@ var pay = function(stripe, card) {
           errorMsg.textContent = '';
         }, 4000);
       } else {
-        createCustomer(result.paymentMethod.id, cardholderEmail);
+        createCustomer(result.paymentMethod.id, cardholderEmail, allPlanIds /* TODO: replace with customer input */);
       }
     });
 };
 
-function createCustomer(paymentMethod, cardholderEmail) {
+function createCustomer(paymentMethod, cardholderEmail, planIds) {
   return fetch('/create-customer', {
     method: 'post',
     headers: {
@@ -72,7 +74,8 @@ function createCustomer(paymentMethod, cardholderEmail) {
     },
     body: JSON.stringify({
       email: cardholderEmail,
-      payment_method: paymentMethod
+      payment_method: paymentMethod,
+      plan_ids: planIds
     })
   })
     .then(response => {
@@ -118,8 +121,8 @@ function confirmSubscription(subscriptionId) {
     });
 }
 
-function getPublicKey() {
-  return fetch('/public-key', {
+function boostrap() {
+  return fetch('/bootstrap', {
     method: 'get',
     headers: {
       'Content-Type': 'application/json'
@@ -129,11 +132,11 @@ function getPublicKey() {
       return response.json();
     })
     .then(function(response) {
-      stripeElements(response.publicKey);
+      stripeElements(response.publicKey, response.planIds);
     });
 }
 
-getPublicKey();
+boostrap();
 
 /* ------- Post-payment helpers ------- */
 

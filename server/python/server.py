@@ -25,9 +25,12 @@ stripe.api_version = os.getenv('STRIPE_API_VERSION')
 def get_index():
     return render_template('index.html')
 
-@app.route('/public-key', methods=['GET'])
-def get_public_key():
-    return jsonify(publicKey=os.getenv('STRIPE_PUBLIC_KEY'))
+@app.route('/bootstrap', methods=['GET'])
+def get_boostrap():
+    return jsonify(
+        publicKey=os.getenv('STRIPE_PUBLIC_KEY'),
+        planIds=[os.getenv('SUBSCRIPTION_PLAN_ID')]
+    )
 
 @app.route('/create-customer', methods=['POST'])
 def create_customer():
@@ -97,28 +100,28 @@ def webhook_received():
     data_object = data['object']
     
     if event_type == 'customer.created':
-        # print(data)
+        print(data)
 
     if event_type == 'customer.updated':
-        # print(data)
+        print(data)
 
     if event_type == 'invoice.upcoming':
-        # print(data)
+        print(data)
 
     if event_type == 'invoice.created':
-        # print(data)
+        print(data)
 
     if event_type == 'invoice.finalized':
-        # print(data)
+        print(data)
 
     if event_type == 'invoice.payment_succeeded':
-        # print(data)
+        print(data)
 
     if event_type == 'invoice.payment_failed':
-        # print(data)
+        print(data)
 
     if event_type == 'customer.subscription.created':
-        # print(data)
+        print(data)
 
     return jsonify({'status': 'success'})
 

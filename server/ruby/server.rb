@@ -14,17 +14,13 @@ get '/' do
   send_file File.join(settings.public_folder, 'index.html')
 end
 
-get '/public-key' do
+get '/bootstrap' do
   content_type 'application/json'
 
   {
-    'publicKey': ENV['STRIPE_PUBLIC_KEY']
+    'publicKey': ENV['STRIPE_PUBLIC_KEY'],
+    'planIds': [ENV['SUBSCRIPTION_PLAN_ID']]
   }.to_json
-end
-
-get '/plans' do
-  content_type 'application/json'
-  plans = Stripe::Plan.list()
 end
 
 post '/create-customer' do
