@@ -27,7 +27,7 @@ app.get('/', (req, res) => {
 });
 
 app.get('/bootstrap', (req, res) => {
-  res.send({ publicKey: process.env.STRIPE_PUBLIC_KEY, planIds: [process.env.SUBSCRIPTION_PLAN_ID] });
+  res.send({ publicKey: process.env.STRIPE_PUBLIC_KEY, planIds: process.env.SUBSCRIPTION_PLAN_ID.split(',') });
 });
 
 app.post('/create-customer', async (req, res) => {
@@ -40,12 +40,17 @@ app.post('/create-customer', async (req, res) => {
       default_payment_method: req.body.payment_method
     }
   });
+
+  allPlanIds = process.env.SUBSCRIPTION_PLAN_ID.split(',');
+  coupon = req.body.plan_ids.length == allPlanIds.length ? process.env.PREMIUM_COUPON_ID : null;
+
   // At this point, associate the ID of the Customer object with your
   // own internal representation of a customer, if you have one.
   const subscription = await stripe.subscriptions.create({
     customer: customer.id,
-    items: [{ plan: process.env.SUBSCRIPTION_PLAN_ID }],
-    expand: ['latest_invoice.payment_intent']
+    items: req.body.plan_ids.map(function (planId) { return { plan: planId }; }),
+    expand: ['latest_invoice.payment_intent'],
+    coupon: coupon
   });
 
   res.send(subscription);
