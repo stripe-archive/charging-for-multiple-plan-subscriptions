@@ -34,14 +34,13 @@ $app->get('/', function (Request $request, Response $response, array $args) {
 
 $app->get('/bootstrap', function (Request $request, Response $response, array $args) {
   $pub_key = getenv('STRIPE_PUBLIC_KEY');
-  $plan_ids = array(0 => getenv('SUBSCRIPTION_PLAN_ID'));
+  $plan_ids = explode(",", getenv('SUBSCRIPTION_PLAN_ID'));
   
   // Send public key details to client
   return $response->withJson(array('publicKey' => $pub_key, 'planIds' => $plan_ids));
 });
 
-$app->post('/create-customer', function (Request $request, Response $response, array $args) {  
-  $plan_id = getenv('SUBSCRIPTION_PLAN_ID');
+$app->post('/create-customer', function (Request $request, Response $response, array $args) {
   $body = json_decode($request->getBody());
   
   # This creates a new Customer and attaches the PaymentMethod in one API call.
@@ -55,16 +54,15 @@ $app->post('/create-customer', function (Request $request, Response $response, a
     ]
   ]);
 
+  $premiumCouponCode = getenv('PREMIUM_COUPON_ID');
+  $allPlanIds = explode(",", getenv('SUBSCRIPTION_PLAN_ID'));
+  $coupon = count($allPlanIds) == count($body->plan_ids) ? $premiumCouponCode : null;
   $subscription = \Stripe\Subscription::create([
     "customer" => $customer['id'],
-    "items" => [
-      [
-        "plan" => $plan_id,
-      ],
-    ], 
-    "expand" => ['latest_invoice.payment_intent']
+    "items" => array_map(function ($planId) { return [ "plan" => $planId ]; }, $body->plan_ids),
+    "expand" => ['latest_invoice.payment_intent'],
+    "coupon" => $coupon
   ]);
-
 
   return $response->withJson($subscription);
 });
