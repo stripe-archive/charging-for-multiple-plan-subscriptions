@@ -50,7 +50,6 @@ var pay = function(stripe, card) {
       }
     })
     .then(function(result) {
-      console.log(result);
       if (result.error) {
         document.querySelector('#submit').disabled = false;
         // The card was declined (i.e. insufficient funds, card has expired, etc)
@@ -60,7 +59,7 @@ var pay = function(stripe, card) {
           errorMsg.textContent = '';
         }, 4000);
       } else {
-        // createCustomer(result.paymentMethod.id, cardholderEmail);
+        createCustomer(result.paymentMethod.id, cardholderEmail);
       }
     });
 };
