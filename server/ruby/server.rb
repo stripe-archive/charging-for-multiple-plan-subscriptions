@@ -19,7 +19,7 @@ get '/bootstrap' do
 
   {
     'publicKey': ENV['STRIPE_PUBLIC_KEY'],
-    'planIds': [ENV['SUBSCRIPTION_PLAN_ID']]
+    'planIds': ENV['SUBSCRIPTION_PLAN_ID'].split(',')
   }.to_json
 end
 
@@ -38,14 +38,16 @@ post '/create-customer' do
     }
   )
 
+  planIds = data['plan_ids']
+  allPlanIds = ENV['SUBSCRIPTION_PLAN_ID'].split(',')
+  premiumCouponId = ENV['PREMIUM_COUPON_ID']
+  coupon = planIds.length == allPlanIds.length ? premiumCouponId : nil
+
   subscription = Stripe::Subscription.create(
     customer: customer.id,
-    items: [
-      {
-        plan: ENV['SUBSCRIPTION_PLAN_ID']
-      }
-    ],
-    expand: ['latest_invoice.payment_intent']
+    items: planIds.map{|planId| { plan: planId }}.compact,
+    expand: ['latest_invoice.payment_intent'],
+    coupon: coupon,
   )
 
   subscription.to_json
