@@ -11,6 +11,8 @@ import java.util.Map;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonPrimitive;
 import com.google.gson.annotations.SerializedName;
 import com.stripe.Stripe;
 import com.stripe.exception.SignatureVerificationException;
@@ -61,11 +63,14 @@ public class Server {
         staticFiles.externalLocation(
                 Paths.get(Paths.get("").toAbsolutePath().toString(), dotenv.get("STATIC_DIR")).normalize().toString());
 
-        get("/public-key", (request, response) -> {
+        get("/bootstrap", (request, response) -> {
             response.type("application/json");
-            JsonObject publicKey = new JsonObject();
-            publicKey.addProperty("publicKey", dotenv.get("STRIPE_PUBLIC_KEY"));
-            return publicKey.toString();
+            JsonObject payload = new JsonObject();
+            payload.addProperty("publicKey", dotenv.get("STRIPE_PUBLIC_KEY"));
+            JsonArray planIds = new JsonArray();
+            planIds.add(new JsonPrimitive(dotenv.get("SUBSCRIPTION_PLAN_ID")));
+            payload.add("planIds", planIds);
+            return payload.toString();
         });
 
         post("/create-customer", (request, response) -> {

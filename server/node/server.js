@@ -26,8 +26,8 @@ app.get('/', (req, res) => {
   res.sendFile(path);
 });
 
-app.get('/public-key', (req, res) => {
-  res.send({ publicKey: process.env.STRIPE_PUBLIC_KEY });
+app.get('/bootstrap', (req, res) => {
+  res.send({ publicKey: process.env.STRIPE_PUBLIC_KEY, planIds: [process.env.SUBSCRIPTION_PLAN_ID] });
 });
 
 app.post('/create-customer', async (req, res) => {

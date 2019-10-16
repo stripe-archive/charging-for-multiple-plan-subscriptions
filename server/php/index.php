@@ -32,11 +32,12 @@ $app->get('/', function (Request $request, Response $response, array $args) {
   return $response->write(file_get_contents('../../client/index.html'));
 });
 
-$app->get('/public-key', function (Request $request, Response $response, array $args) {
+$app->get('/bootstrap', function (Request $request, Response $response, array $args) {
   $pub_key = getenv('STRIPE_PUBLIC_KEY');
+  $plan_ids = array(0 => getenv('SUBSCRIPTION_PLAN_ID'));
   
   // Send public key details to client
-  return $response->withJson(array('publicKey' => $pub_key));
+  return $response->withJson(array('publicKey' => $pub_key, 'planIds' => $plan_ids));
 });
 
 $app->post('/create-customer', function (Request $request, Response $response, array $args) {  
