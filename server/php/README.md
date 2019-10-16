@@ -1,9 +1,10 @@
-# Name of sample
+# Stripe Billing charging for subscriptions
 
 ## Requirements
-* PHP >= 7.1.3
-* Composer
-* [Slim](http://www.slimframework.com/)
+
+- PHP >= 7.1.3
+- Composer
+- [Slim](http://www.slimframework.com/)
 
 ## How to run
 

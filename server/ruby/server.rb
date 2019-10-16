@@ -2,13 +2,11 @@ require 'stripe'
 require 'sinatra'
 require 'dotenv'
 
-# Replace if using a different env file or config
-ENV_FILE_PATH = '/../../.env'
-Dotenv.load(File.dirname(__FILE__) + ENV_FILE_PATH)
+Dotenv.load(File.dirname(__FILE__) + '/../../.env')
 Stripe.api_key = ENV['STRIPE_SECRET_KEY']
 
 set :static, true
-set :public_folder, File.join(File.dirname(__FILE__), ENV['STATIC_DIR'])
+set :public_folder, File.join(File.dirname(__FILE__), '../../client/')
 set :port, 4242
 
 get '/' do
@@ -16,13 +14,54 @@ get '/' do
   send_file File.join(settings.public_folder, 'index.html')
 end
 
-post '/' do
+get '/public-key' do
+  content_type 'application/json'
+
+  {
+    'publicKey': ENV['STRIPE_PUBLIC_KEY']
+  }.to_json
+end
+
+get '/plans' do
+  content_type 'application/json'
+  plans = Stripe::Plan.list()
+end
+
+post '/create-customer' do
   content_type 'application/json'
   data = JSON.parse request.body.read
 
-  {
-    data: data
-  }.to_json
+  # This creates a new Customer and attaches the PaymentMethod in one API call.
+  # At this point, associate the ID of the Customer object with your
+  # own internal representation of a customer, if you have one. 
+  customer = Stripe::Customer.create(
+    payment_method: data['payment_method'],
+    email: data['email'],
+    invoice_settings: {
+      default_payment_method: data['payment_method']
+    }
+  )
+
+  subscription = Stripe::Subscription.create(
+    customer: customer.id,
+    items: [
+      {
+        plan: ENV['SUBSCRIPTION_PLAN_ID']
+      }
+    ],
+    expand: ['latest_invoice.payment_intent']
+  )
+
+  subscription.to_json
+end
+
+post '/subscription' do
+  content_type 'application/json'
+  data = JSON.parse request.body.read
+
+  subscription = Stripe::Subscription.retrieve(data['subscriptionId'])
+
+  subscription.to_json
 end
 
 post '/webhook' do
@@ -34,7 +73,7 @@ post '/webhook' do
     # Retrieve the event by verifying the signature using the raw body and secret if webhook signing is configured.
     sig_header = request.env['HTTP_STRIPE_SIGNATURE']
     event = nil
-  
+
     begin
       event = Stripe::Webhook.construct_event(
           payload, sig_header, webhook_secret
@@ -58,8 +97,36 @@ post '/webhook' do
   data = event['data']
   data_object = data['object']
 
-  if event_type == 'some.event'
-    puts "🔔  Webhook received!"
+  if event_type == 'customer.created'
+    # puts data_object
+  end
+
+  if event_type == 'customer.updated'
+    # puts data_object
+  end
+
+  if event_type == 'invoice.upcoming'
+    # puts data_object
+  end
+
+  if event_type == 'invoice.created'
+    # puts data_object
+  end
+
+  if event_type == 'invoice.finalized'
+    # puts data_object
+  end
+
+  if event_type == 'invoice.payment_succeeded'
+    # puts data_object
+  end
+
+  if event_type == 'invoice.payment_failed'
+    # puts data_object
+  end
+
+  if event_type == 'customer.subscription.created'
+    # puts data_object
   end
 
   content_type 'application/json'
