@@ -166,7 +166,7 @@ function bootstrap() {
       });
 
       // BEGIN TEST HOOK
-      Object.keys(allPlans).forEach((id) => {
+      /*Object.keys(allPlans).forEach((id) => {
         document.getElementById('test-hook-please-ignore').innerHTML += `<input type="checkbox" id="${id}">${id}<br>`;
         window.requestAnimationFrame(() =>
         {
@@ -175,14 +175,46 @@ function bootstrap() {
             updatePrice();
           });
         })
-      });
+      });*/
       // END TEST HOOK
-
+      generateHtmlForPlansPage();
       stripeElements(json.publicKey);
     });
 }
 
 bootstrap();
+
+function generateHtmlForPlansPage(){
+  function generateHtmlForSinglePlan(id, animal, price, url){
+    result = `
+      <div class="sr-animal">
+        <img
+          class="sr-animal-pic"
+          src="https://picsum.photos/280/320?random=1"
+          width="140"
+          height="160"
+          id=\'${id}\'
+          onclick="toggleAnimal(\'${id}\')"
+        />
+        <div class="sr-animal-text">\'${animal}\'</div>
+        <div class="sr-animal-text">$\'${price}\'</div>
+      </div>
+      `;
+    return result;
+  }
+  var html = '';
+  Object.keys(allPlans).forEach((planId) => {
+    html += generateHtmlForSinglePlan(planId, allPlans[planId].animal, allPlans[planId].price, allPlans[planId].imageURL);
+  });
+
+  document.getElementById('test-hook-please-ignore').innerHTML += html;
+}
+
+function toggleAnimal(id){
+  console.log(id);
+  allPlans[id].selected = !allPlans[id].selected;
+  updatePrice();
+}
 
 /* ------- Post-payment helpers ------- */
 
