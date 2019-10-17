@@ -41,8 +41,8 @@ app.post('/create-customer', async (req, res) => {
     }
   });
 
-  allPlanIds = process.env.SUBSCRIPTION_PLAN_ID.split(',');
-  coupon = req.body.plan_ids.length == allPlanIds.length ? process.env.PREMIUM_COUPON_ID : null;
+  const allPlanIds = process.env.SUBSCRIPTION_PLAN_ID.split(',');
+  const coupon = req.body.plan_ids.length == allPlanIds.length ? process.env.PREMIUM_COUPON_ID : null;
 
   // At this point, associate the ID of the Customer object with your
   // own internal representation of a customer, if you have one.
