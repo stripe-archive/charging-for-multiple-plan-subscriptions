@@ -62,19 +62,24 @@ post '/create-customer' do
   # ** Note that our API does not support combining plans with different billing cycles
   # or currencies in one subscription. You may also want to check consistency in those
   # here **
-  planIds = data['plan_ids']
-  validPlanIds = ENV['SUBSCRIPTION_PLAN_ID'].split(',').slice(1,3)
-  planIds = planIds & validPlanIds # union of the lists
+  requestedPlanIds = data['plan_ids']
+  validPlanIds = ENV['SUBSCRIPTION_PLAN_ID'].split(',')
+  validRequestedPlanIds = planIds & validPlanIds # union of the lists
+  if validRequestedPlanIds.length != requestedPlanIds.length
+    puts "⚠️ Client requested subscription with invalid Plan ID"
+    status 400
+    return
+  end
 
   # In this example, we apply the coupon if the number of plans purchased by
   # passes the threshold.
   couponId = ENV['COUPON_ID']
-  eligibleForDiscount = planIds.length >= minPlansForDiscount
+  eligibleForDiscount = requestedPlanIds.length >= minPlansForDiscount
   coupon = eligibleForDiscount ? couponId : nil
 
   subscription = Stripe::Subscription.create(
     customer: customer.id,
-    items: planIds.map{|planId| { plan: planId }}.compact,
+    items: requestedPlanIds.map{|planId| { plan: planId }}.compact,
     expand: ['latest_invoice.payment_intent'],
     coupon: coupon,
   )
