@@ -10,19 +10,23 @@ set :public_folder, File.join(File.dirname(__FILE__), '../../client/')
 set :port, 4242
 
 # Number of coupons required to get a discount in this example.
-couponThreshold = 2
+minPlansForDiscount = 2
 
 get '/' do
   content_type 'text/html'
   send_file File.join(settings.public_folder, 'index.html')
 end
 
+# This endpoint is used by client in client/script.js
+# Returns relevant data about plans using the Stripe API
 get '/bootstrap' do
   content_type 'application/json'
 
   planIds = ENV['SUBSCRIPTION_PLAN_IDS'].split(',')
   plans = []
   for id in planIds do
+    # See https://site-admin.stripe.com/docs/api/plans?lang=ruby for more
+    # about retrieving and using Plans.
     plan = Stripe::Plan.retrieve(id)
     plans.push({
       id: plan['id'],
@@ -53,13 +57,29 @@ post '/create-customer' do
     }
   )
 
-  planIds = data['plan_ids']
-  premiumCouponId = ENV['COUPON_ID']
-  coupon = planIds.length >= couponThreshold ? premiumCouponId : nil
+  # Here we make sure the planIds passed by client are consistent with those
+  # we want to allow.
+  # ** Note that our API does not support combining plans with different billing cycles
+  # or currencies in one subscription. You may also want to check consistency in those
+  # here **
+  requestedPlanIds = data['plan_ids']
+  validPlanIds = ENV['SUBSCRIPTION_PLAN_ID'].split(',')
+  validRequestedPlanIds = requestedPlanIds & validPlanIds # intersection of lists
+  if validRequestedPlanIds.length != requestedPlanIds.length
+    puts "⚠️  Client requested subscription with invalid Plan ID"
+    status 400
+    return
+  end
+
+  # In this example, we apply the coupon if the number of plans purchased by
+  # passes the threshold.
+  couponId = ENV['COUPON_ID']
+  eligibleForDiscount = requestedPlanIds.length >= minPlansForDiscount
+  coupon = eligibleForDiscount ? couponId : nil
 
   subscription = Stripe::Subscription.create(
     customer: customer.id,
-    items: planIds.map{|planId| { plan: planId }}.compact,
+    items: requestedPlanIds.map{|planId| { plan: planId }}.compact,
     expand: ['latest_invoice.payment_intent'],
     coupon: coupon,
   )
