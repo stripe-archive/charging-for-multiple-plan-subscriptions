@@ -176,7 +176,7 @@ function boostrap() {
           });
         })
       });
-      // END TEST HOOKS
+      // END TEST HOOK
 
       stripeElements(json.publicKey);
     });
