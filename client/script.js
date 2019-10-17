@@ -1,5 +1,7 @@
 var stripe;
 var allPlans = {};
+var minPlansForDiscount = 2;
+var discountFactor = .8;
 
 var stripeElements = function(publicKey) {
   stripe = Stripe(publicKey);
@@ -60,12 +62,34 @@ var pay = function(stripe, card) {
           errorMsg.textContent = '';
         }, 4000);
       } else {
-        createCustomer(result.paymentMethod.id, cardholderEmail, Object.keys(allPlans) /* TODO: replace with customer input */);
+        createCustomer(result.paymentMethod.id, cardholderEmail);
       }
     });
 };
 
-function createCustomer(paymentMethod, cardholderEmail, planIds) {
+var computePrice = function() {
+  var selectedPlans = getSelectedPlans();
+  var total = selectedPlans
+    .map(plan => plan.price)
+    .reduce((plan1, plan2) => plan1 + plan2, 0);
+  var eligibleForDiscount = selectedPlans.length >= minPlansForDiscount;
+  if (eligibleForDiscount) {
+    total *= discountFactor;
+  }
+
+  return total;
+}
+
+var updatePrice = function() {
+  var price = computePrice();
+  document.getElementById('total-amount').innerHTML = `\$${price}`;
+}
+
+var getSelectedPlans = function() {
+  return Object.values(allPlans).filter(plan => plan.selected);
+}
+
+function createCustomer(paymentMethod, cardholderEmail) {
   return fetch('/create-customer', {
     method: 'post',
     headers: {
@@ -74,7 +98,7 @@ function createCustomer(paymentMethod, cardholderEmail, planIds) {
     body: JSON.stringify({
       email: cardholderEmail,
       payment_method: paymentMethod,
-      plan_ids: planIds
+      plan_ids: getSelectedPlans().map(plan => plan.id)
     })
   })
     .then(response => {
@@ -140,6 +164,17 @@ function boostrap() {
         plan.selected = false;
         allPlans[plan.id] = plan;
       });
+
+      // BEGIN TEST HOOKS
+      document.querySelector('#plan_G0OSdwEX5BMKI0').addEventListener('click', function(evt) {
+        allPlans['plan_G0OSdwEX5BMKI0'].selected = document.getElementById('plan_G0OSdwEX5BMKI0').checked
+        updatePrice();
+      });
+      document.querySelector('#plan_G042rpwfUcv6Ca').addEventListener('click', function(evt) {
+        allPlans['plan_G042rpwfUcv6Ca'].selected = document.getElementById('plan_G042rpwfUcv6Ca').checked
+        updatePrice();
+      });
+      // END TEST HOOKS
 
       stripeElements(json.publicKey);
     });
