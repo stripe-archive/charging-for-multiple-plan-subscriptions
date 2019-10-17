@@ -164,53 +164,6 @@ function bootstrap() {
         plan.selected = false;
         allPlans[plan.id] = plan;
       });
-
-      // BEGIN TEST HOOK
-      var buildProductElt = function(plan) {
-        var productNameElt = document.createElement('label');
-        productNameElt.innerHTML = `${plan.animal}`;
-
-        var productElt = document.createElement('div');
-        productElt.classList.add('product');
-        productElt.appendChild(productNameElt);
-        productElt.setAttribute('planId', `${plan.id}`);
-        return productElt;
-      }
-
-      var updateProductElt = function(productElt) {
-        var planId = productElt.getAttribute('planId');
-        var plan = allPlans[planId];
-        if (plan.selected) {
-          productElt.classList.add('selected');
-        }
-        else {
-          productElt.classList.remove('selected');
-        }
-      }
-
-      var togglePlan = function(planId) {
-        var plan = allPlans[`${planId}`];
-        plan.selected = !plan.selected;
-        return plan.selected;
-      }
-
-      var handleClick = function(evt) {
-        evt.preventDefault();
-        var productElt = evt.currentTarget;
-        var planId = productElt.getAttribute('planId');
-        togglePlan(planId);
-        updateProductElt(productElt);
-        updatePrice();
-      }
-
-      Object.values(allPlans).forEach((plan) => {
-        var productElt = buildProductElt(plan);
-        document
-          .getElementById('test-hook-please-ignore')
-          .appendChild(productElt)
-          .addEventListener('click', handleClick);
-      });
-      // END TEST HOOK
       generateHtmlForPlansPage();
       stripeElements(json.publicKey);
     });
@@ -223,15 +176,15 @@ function generateHtmlForPlansPage(){
     result = `
       <div class="sr-animal">
         <img
-          class="sr-animal-pic"
-          src="https://picsum.photos/280/320?random=1"
+          class="sr-animal-pic product"
+          src=\'${url}\'
           width="140"
           height="160"
           id=\'${id}\'
           onclick="toggleAnimal(\'${id}\')"
         />
-        <div class="sr-animal-text">\'${animal}\'</div>
-        <div class="sr-animal-text">$\'${price}\'</div>
+        <div class="sr-animal-text">${animal}</div>
+        <div class="sr-animal-text">$${price}</div>
       </div>
       `;
     return result;
@@ -241,12 +194,19 @@ function generateHtmlForPlansPage(){
     html += generateHtmlForSinglePlan(planId, allPlans[planId].animal, allPlans[planId].price, allPlans[planId].imageURL);
   });
 
-  document.getElementById('test-hook-please-ignore').innerHTML += html;
+  document.getElementById('product-selection').innerHTML += html;
 }
 
 function toggleAnimal(id){
-  console.log(id);
   allPlans[id].selected = !allPlans[id].selected;
+  var productElt = document.getElementById(id);
+  if (allPlans[id].selected) {
+    productElt.classList.add('selected');
+  }
+  else {
+    productElt.classList.remove('selected');
+  }
+
   updatePrice();
 }
 

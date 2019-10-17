@@ -442,8 +442,12 @@ pre {
   display: none;
 }
 
+.product {
+  opacity: .5
+}
+
 .product.selected {
-  color: blue;
+  opacity: 1
 }
 
 @keyframes field-in {
