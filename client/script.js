@@ -149,7 +149,7 @@ function confirmSubscription(subscriptionId) {
     });
 }
 
-function boostrap() {
+function bootstrap() {
   return fetch('/bootstrap', {
     method: 'get',
     headers: {
@@ -166,34 +166,55 @@ function boostrap() {
       });
 
       // BEGIN TEST HOOK
-      Object.keys(allPlans).forEach((id) => {
-        var checkboxElt = document.createElement('input');
-        checkboxElt.setAttribute('type', 'checkbox')
-        checkboxElt.setAttribute('id', id);
-        checkboxElt.addEventListener('click', function () {
-          allPlans[`${id}`].selected = document.getElementById(`${id}`).checked
-          updatePrice();
-        });
-
-        // var descriptionElt = document.createElement('div');
-        // descriptionElt.innerHTML = `${id}`;
-
-        var productElt = document.createElement('div');
-        productElt.appendChild(checkboxElt);
-        //productElt.appendChild(descriptionElt);
-        productElt.innerHTML += `${id}<br>`
-
-        document
-          .getElementById('test-hook-please-ignore')
-          .appendChild(productElt);
-      });
+      /*Object.keys(allPlans).forEach((id) => {
+        document.getElementById('test-hook-please-ignore').innerHTML += `<input type="checkbox" id="${id}">${id}<br>`;
+        window.requestAnimationFrame(() =>
+        {
+          document.querySelector(`#${id}`).addEventListener('click', function(evt) {
+            allPlans[`${id}`].selected = document.getElementById(`${id}`).checked
+            updatePrice();
+          });
+        })
+      });*/
       // END TEST HOOK
-
+      generateHtmlForPlansPage();
       stripeElements(json.publicKey);
     });
 }
 
-boostrap();
+bootstrap();
+
+function generateHtmlForPlansPage(){
+  function generateHtmlForSinglePlan(id, animal, price, url){
+    result = `
+      <div class="sr-animal">
+        <img
+          class="sr-animal-pic"
+          src="https://picsum.photos/280/320?random=1"
+          width="140"
+          height="160"
+          id=\'${id}\'
+          onclick="toggleAnimal(\'${id}\')"
+        />
+        <div class="sr-animal-text">\'${animal}\'</div>
+        <div class="sr-animal-text">$\'${price}\'</div>
+      </div>
+      `;
+    return result;
+  }
+  var html = '';
+  Object.keys(allPlans).forEach((planId) => {
+    html += generateHtmlForSinglePlan(planId, allPlans[planId].animal, allPlans[planId].price, allPlans[planId].imageURL);
+  });
+
+  document.getElementById('test-hook-please-ignore').innerHTML += html;
+}
+
+function toggleAnimal(id){
+  console.log(id);
+  allPlans[id].selected = !allPlans[id].selected;
+  updatePrice();
+}
 
 /* ------- Post-payment helpers ------- */
 
