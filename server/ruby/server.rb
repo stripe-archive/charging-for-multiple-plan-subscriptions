@@ -64,9 +64,9 @@ post '/create-customer' do
   # here **
   requestedPlanIds = data['plan_ids']
   validPlanIds = ENV['SUBSCRIPTION_PLAN_ID'].split(',')
-  validRequestedPlanIds = planIds & validPlanIds # intersection of the lists
+  validRequestedPlanIds = requestedPlanIds & validPlanIds # intersection of lists
   if validRequestedPlanIds.length != requestedPlanIds.length
-    puts "⚠️ Client requested subscription with invalid Plan ID"
+    puts "⚠️  Client requested subscription with invalid Plan ID"
     status 400
     return
   end
