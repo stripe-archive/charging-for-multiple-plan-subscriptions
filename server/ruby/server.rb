@@ -10,7 +10,7 @@ set :public_folder, File.join(File.dirname(__FILE__), '../../client/')
 set :port, 4242
 
 # Number of coupons required to get a discount in this example.
-couponThreshold = 2
+minPlansForDiscount = 2
 
 get '/' do
   content_type 'text/html'
@@ -57,11 +57,20 @@ post '/create-customer' do
     }
   )
 
+  # Here we make sure the planIds passed by client are consistent with those
+  # we want to allow.
+  # ** Note that our API does not support combining plans with different billing cycles
+  # or currencies in one subscription. You may also want to check consistency in those
+  # here **
+  planIds = data['plan_ids']
+  validPlanIds = ENV['SUBSCRIPTION_PLAN_ID'].split(',').slice(1,3)
+  planIds = planIds & validPlanIds # union of the lists
+
   # In this example, we apply the coupon if the number of plans purchased by
   # passes the threshold.
-  planIds = data['plan_ids']
   couponId = ENV['COUPON_ID']
-  coupon = planIds.length >= couponThreshold ? couponId : nil
+  eligibleForDiscount = planIds.length >= minPlansForDiscount
+  coupon = eligibleForDiscount ? couponId : nil
 
   subscription = Stripe::Subscription.create(
     customer: customer.id,
