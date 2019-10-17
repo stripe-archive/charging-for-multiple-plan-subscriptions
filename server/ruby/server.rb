@@ -10,7 +10,7 @@ set :public_folder, File.join(File.dirname(__FILE__), '../../client/')
 set :port, 4242
 
 # Number of coupons required to get a discount in this example.
-couponThreshold = 2
+minPlansForDiscount = 2
 
 get '/' do
   content_type 'text/html'
@@ -55,7 +55,8 @@ post '/create-customer' do
 
   planIds = data['plan_ids']
   premiumCouponId = ENV['COUPON_ID']
-  coupon = planIds.length >= couponThreshold ? premiumCouponId : nil
+  eligibleForDiscount = planIds.length >= minPlansForDiscount
+  coupon = eligibleForDiscount ? premiumCouponId : nil
 
   subscription = Stripe::Subscription.create(
     customer: customer.id,

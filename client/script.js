@@ -136,8 +136,37 @@ function boostrap() {
     .then(function(response) {
       return response.json();
     })
-    .then(function(response) {
-      stripeElements(response.publicKey, response.plans);
+    .then(function(json) {
+      json.plans.forEach(function(plan) {
+        plan.selected = false;
+        allPlans[plan.id] = plan;
+      });
+
+      // BEGIN TEST HOOK
+      Object.keys(allPlans).forEach((id) => {
+        var checkboxElt = document.createElement('input');
+        checkboxElt.setAttribute('type', 'checkbox')
+        checkboxElt.setAttribute('id', id);
+        checkboxElt.addEventListener('click', function () {
+          allPlans[`${id}`].selected = document.getElementById(`${id}`).checked
+          updatePrice();
+        });
+
+        // var descriptionElt = document.createElement('div');
+        // descriptionElt.innerHTML = `${id}`;
+
+        var productElt = document.createElement('div');
+        productElt.appendChild(checkboxElt);
+        //productElt.appendChild(descriptionElt);
+        productElt.innerHTML += `${id}<br>`
+
+        document
+          .getElementById('test-hook-please-ignore')
+          .appendChild(productElt);
+      });
+      // END TEST HOOK
+
+      stripeElements(json.publicKey);
     });
 }
 
