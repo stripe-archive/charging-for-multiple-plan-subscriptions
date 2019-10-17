@@ -165,14 +165,16 @@ function boostrap() {
         allPlans[plan.id] = plan;
       });
 
-      // BEGIN TEST HOOKS
-      document.querySelector('#plan_G0OSdwEX5BMKI0').addEventListener('click', function(evt) {
-        allPlans['plan_G0OSdwEX5BMKI0'].selected = document.getElementById('plan_G0OSdwEX5BMKI0').checked
-        updatePrice();
-      });
-      document.querySelector('#plan_G042rpwfUcv6Ca').addEventListener('click', function(evt) {
-        allPlans['plan_G042rpwfUcv6Ca'].selected = document.getElementById('plan_G042rpwfUcv6Ca').checked
-        updatePrice();
+      // BEGIN TEST HOOK
+      Object.keys(allPlans).forEach((id) => {
+        document.getElementById('test-hook-please-ignore').innerHTML += `<input type="checkbox" id="${id}">${id}<br>`;
+        window.requestAnimationFrame(() =>
+        {
+          document.querySelector(`#${id}`).addEventListener('click', function(evt) {
+            allPlans[`${id}`].selected = document.getElementById(`${id}`).checked
+            updatePrice();
+          });
+        })
       });
       // END TEST HOOKS
 
