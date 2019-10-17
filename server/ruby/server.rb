@@ -9,6 +9,9 @@ set :static, true
 set :public_folder, File.join(File.dirname(__FILE__), '../../client/')
 set :port, 4242
 
+# Number of coupons required to get a discount in this example.
+couponThreshold = 2
+
 get '/' do
   content_type 'text/html'
   send_file File.join(settings.public_folder, 'index.html')
@@ -17,9 +20,21 @@ end
 get '/bootstrap' do
   content_type 'application/json'
 
+  planIds = ENV['SUBSCRIPTION_PLAN_IDS'].split(',')
+  plans = []
+  for id in planIds do
+    plan = Stripe::Plan.retrieve(id)
+    plans.push({
+      id: plan['id'],
+      price: plan['amount'],
+      animal: plan['metadata']['animal'],
+      imageURL: plan['metadata']['imageURL']
+    })
+  end
+
   {
     'publicKey': ENV['STRIPE_PUBLIC_KEY'],
-    'planIds': ENV['SUBSCRIPTION_PLAN_ID'].split(',')
+    'plans': plans
   }.to_json
 end
 
@@ -29,7 +44,7 @@ post '/create-customer' do
 
   # This creates a new Customer and attaches the PaymentMethod in one API call.
   # At this point, associate the ID of the Customer object with your
-  # own internal representation of a customer, if you have one. 
+  # own internal representation of a customer, if you have one.
   customer = Stripe::Customer.create(
     payment_method: data['payment_method'],
     email: data['email'],
@@ -39,9 +54,8 @@ post '/create-customer' do
   )
 
   planIds = data['plan_ids']
-  allPlanIds = ENV['SUBSCRIPTION_PLAN_ID'].split(',')
-  premiumCouponId = ENV['PREMIUM_COUPON_ID']
-  coupon = planIds.length == allPlanIds.length ? premiumCouponId : nil
+  premiumCouponId = ENV['COUPON_ID']
+  coupon = planIds.length >= couponThreshold ? premiumCouponId : nil
 
   subscription = Stripe::Subscription.create(
     customer: customer.id,
@@ -90,7 +104,7 @@ post '/webhook' do
     data = JSON.parse(payload, symbolize_names: true)
     event = Stripe::Event.construct_from(data)
   end
-  # Get the type of webhook event sent - used to check the status of PaymentIntents.    
+  # Get the type of webhook event sent - used to check the status of PaymentIntents.
   event_type = event['type']
   data = event['data']
   data_object = data['object']

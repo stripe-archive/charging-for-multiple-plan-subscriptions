@@ -1,9 +1,8 @@
 var stripe;
-var allPlanIds;
+var allPlans = {};
 
-var stripeElements = function(publicKey, planIds) {
+var stripeElements = function(publicKey) {
   stripe = Stripe(publicKey);
-  allPlanIds = planIds;
   var elements = stripe.elements();
 
   // Element styles
@@ -61,7 +60,7 @@ var pay = function(stripe, card) {
           errorMsg.textContent = '';
         }, 4000);
       } else {
-        createCustomer(result.paymentMethod.id, cardholderEmail, allPlanIds /* TODO: replace with customer input */);
+        createCustomer(result.paymentMethod.id, cardholderEmail, Object.keys(allPlans) /* TODO: replace with customer input */);
       }
     });
 };
@@ -136,8 +135,13 @@ function boostrap() {
     .then(function(response) {
       return response.json();
     })
-    .then(function(response) {
-      stripeElements(response.publicKey, response.planIds);
+    .then(function(json) {
+      json.plans.forEach(function(plan) {
+        plan.selected = false;
+        allPlans[plan.id] = plan;
+      });
+
+      stripeElements(json.publicKey);
     });
 }
 
