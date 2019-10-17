@@ -1,0 +1,14 @@
+[
+    {
+        "id": "stripeDemo_dog_plan",
+        "price": 100,
+        "animal": "dog",
+        "imageURL": "dog.jpg"
+    },
+    {
+        "id": "stripeDemo_cat_plan",
+        "price": 200,
+        "animal": "cat",
+        "imageURL": "cat.webp"
+    }
+]
