@@ -169,19 +169,26 @@ function boostrap() {
       Object.keys(allPlans).forEach((id) => {
         var checkboxElt = document.createElement('input');
         checkboxElt.setAttribute('type', 'checkbox')
-        checkboxElt.setAttribute('id', id);
-        checkboxElt.addEventListener('click', function () {
-          allPlans[`${id}`].selected = document.getElementById(`${id}`).checked
-          updatePrice();
-        });
 
-        // var descriptionElt = document.createElement('div');
-        // descriptionElt.innerHTML = `${id}`;
+        var labelElt = document.createElement('label');
+        labelElt.appendChild(checkboxElt);
+        labelElt.innerHTML += `${id}<br>`
 
         var productElt = document.createElement('div');
-        productElt.appendChild(checkboxElt);
-        //productElt.appendChild(descriptionElt);
-        productElt.innerHTML += `${id}<br>`
+        productElt.setAttribute('productId', `${id}`);
+        productElt.appendChild(labelElt);
+        productElt.addEventListener('click', function(evt) {
+          evt.preventDefault();
+          var product = evt.currentTarget;
+          var plan = allPlans[`${product.getAttribute('productId')}`];
+          plan.selected = !plan.selected;
+          var checkbox = product.getElementsByTagName('input')[0];
+          if (checkbox) {
+            checkbox.checked = plan.selected;
+          }
+
+          updatePrice();
+        });
 
         document
           .getElementById('test-hook-please-ignore')
