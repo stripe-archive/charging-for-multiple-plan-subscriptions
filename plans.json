@@ -1,13 +1,13 @@
 [
     {
         "planId": "stripeDemo_dog_plan",
-        "price": 100,
+        "price": 10000,
         "title": "dog",
         "image": "dog.jpg"
     },
     {
         "planId": "stripeDemo_cat_plan",
-        "price": 200,
+        "price": 20000,
         "title": "cat",
         "image": "cat.webp"
     }
