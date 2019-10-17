@@ -57,12 +57,6 @@ post '/create-customer' do
     }
   )
 
-<<<<<<< HEAD
-  planIds = data['plan_ids']
-  premiumCouponId = ENV['COUPON_ID']
-  eligibleForDiscount = planIds.length >= minPlansForDiscount
-  coupon = eligibleForDiscount ? premiumCouponId : nil
-=======
   # Here we make sure the planIds passed by client are consistent with those
   # we want to allow.
   # ** Note that our API does not support combining plans with different billing cycles
@@ -82,7 +76,6 @@ post '/create-customer' do
   couponId = ENV['COUPON_ID']
   eligibleForDiscount = requestedPlanIds.length >= minPlansForDiscount
   coupon = eligibleForDiscount ? couponId : nil
->>>>>>> 466eb7aa3aabe2e576d9832890aa475b3a169e27
 
   subscription = Stripe::Subscription.create(
     customer: customer.id,

@@ -164,19 +164,6 @@ function bootstrap() {
         plan.selected = false;
         allPlans[plan.id] = plan;
       });
-
-      // BEGIN TEST HOOK
-      /*Object.keys(allPlans).forEach((id) => {
-        document.getElementById('test-hook-please-ignore').innerHTML += `<input type="checkbox" id="${id}">${id}<br>`;
-        window.requestAnimationFrame(() =>
-        {
-          document.querySelector(`#${id}`).addEventListener('click', function(evt) {
-            allPlans[`${id}`].selected = document.getElementById(`${id}`).checked
-            updatePrice();
-          });
-        })
-      });*/
-      // END TEST HOOK
       generateHtmlForPlansPage();
       stripeElements(json.publicKey);
     });
@@ -189,15 +176,15 @@ function generateHtmlForPlansPage(){
     result = `
       <div class="sr-animal">
         <img
-          class="sr-animal-pic"
-          src="https://picsum.photos/280/320?random=1"
+          class="sr-animal-pic product"
+          src=\'${url}\'
           width="140"
           height="160"
           id=\'${id}\'
           onclick="toggleAnimal(\'${id}\')"
         />
-        <div class="sr-animal-text">\'${animal}\'</div>
-        <div class="sr-animal-text">$\'${price}\'</div>
+        <div class="sr-animal-text">${animal}</div>
+        <div class="sr-animal-text">$${price}</div>
       </div>
       `;
     return result;
@@ -207,12 +194,19 @@ function generateHtmlForPlansPage(){
     html += generateHtmlForSinglePlan(planId, allPlans[planId].animal, allPlans[planId].price, allPlans[planId].imageURL);
   });
 
-  document.getElementById('test-hook-please-ignore').innerHTML += html;
+  document.getElementById('product-selection').innerHTML += html;
 }
 
 function toggleAnimal(id){
-  console.log(id);
   allPlans[id].selected = !allPlans[id].selected;
+  var productElt = document.getElementById(id);
+  if (allPlans[id].selected) {
+    productElt.classList.add('selected');
+  }
+  else {
+    productElt.classList.remove('selected');
+  }
+
   updatePrice();
 }
 

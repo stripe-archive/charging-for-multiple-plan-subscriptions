@@ -442,6 +442,14 @@ pre {
   display: none;
 }
 
+.product {
+  opacity: .5
+}
+
+.product.selected {
+  opacity: 1
+}
+
 @keyframes field-in {
   0% {
     opacity: 0;
