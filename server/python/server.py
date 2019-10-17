@@ -21,7 +21,7 @@ def load_plans():
     plansFilePath = os.getenv('PLANS_FILE_LOCATION')
     plansJson = Path(plansFilePath).read_text()
     plans = json.loads(plansJson)
-    return { plan["id"]: plan for plan in plans }
+    return { plan["planId"]: plan for plan in plans }
 
 plans = load_plans()
 

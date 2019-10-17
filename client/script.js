@@ -162,7 +162,7 @@ function bootstrap() {
     .then(function(json) {
       json.plans.forEach(function(plan) {
         plan.selected = false;
-        allPlans[plan.id] = plan;
+        allPlans[plan.planId] = plan;
       });
       generateHtmlForPlansPage();
       stripeElements(json.publicKey);
@@ -190,8 +190,8 @@ function generateHtmlForPlansPage(){
     return result;
   }
   var html = '';
-  Object.keys(allPlans).forEach((planId) => {
-    html += generateHtmlForSinglePlan(planId, allPlans[planId].animal, allPlans[planId].price, allPlans[planId].imageURL);
+  Object.values(allPlans).forEach((plan) => {
+    html += generateHtmlForSinglePlan(plan.planId, plan.title, plan.price, plan.image);
   });
 
   document.getElementById('product-selection').innerHTML += html;
