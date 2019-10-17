@@ -126,7 +126,7 @@ function confirmSubscription(subscriptionId) {
     });
 }
 
-function boostrap() {
+function bootstrap() {
   return fetch('/bootstrap', {
     method: 'get',
     headers: {
@@ -141,7 +141,7 @@ function boostrap() {
     });
 }
 
-boostrap();
+bootstrap();
 
 /* ------- Post-payment helpers ------- */
 

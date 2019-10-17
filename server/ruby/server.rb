@@ -17,12 +17,16 @@ get '/' do
   send_file File.join(settings.public_folder, 'index.html')
 end
 
+# This endpoint is used by client in client/script.js
+# Returns relevant data about plans using the Stripe API
 get '/bootstrap' do
   content_type 'application/json'
 
   planIds = ENV['SUBSCRIPTION_PLAN_ID'].split(',')
   plans = []
   for id in planIds do
+    # See https://site-admin.stripe.com/docs/api/plans?lang=ruby for more
+    # about retrieving and using Plans.
     plan = Stripe::Plan.retrieve(id)
     plans.push({
       id: plan['id'],
@@ -53,9 +57,11 @@ post '/create-customer' do
     }
   )
 
+  # In this example, we apply the coupon if the number of plans purchased by
+  # passes the threshold.
   planIds = data['plan_ids']
-  premiumCouponId = ENV['COUPON_ID']
-  coupon = planIds.length >= couponThreshold ? premiumCouponId : nil
+  couponId = ENV['COUPON_ID']
+  coupon = planIds.length >= couponThreshold ? couponId : nil
 
   subscription = Stripe::Subscription.create(
     customer: customer.id,
