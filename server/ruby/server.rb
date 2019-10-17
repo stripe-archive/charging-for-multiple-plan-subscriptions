@@ -20,7 +20,7 @@ end
 get '/bootstrap' do
   content_type 'application/json'
 
-  planIds = ENV['SUBSCRIPTION_PLAN_ID'].split(',')
+  planIds = ENV['SUBSCRIPTION_PLAN_IDS'].split(',')
   plans = []
   for id in planIds do
     plan = Stripe::Plan.retrieve(id)
