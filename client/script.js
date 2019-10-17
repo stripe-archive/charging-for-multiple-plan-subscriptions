@@ -1,9 +1,9 @@
 var stripe;
 var allPlanIds;
 
-var stripeElements = function(publicKey, planIds) {
+var stripeElements = function(publicKey, plans) {
   stripe = Stripe(publicKey);
-  allPlanIds = planIds;
+  allPlanIds = plans.map(plan => plan.id)
   var elements = stripe.elements();
 
   // Element styles
@@ -137,7 +137,7 @@ function boostrap() {
       return response.json();
     })
     .then(function(response) {
-      stripeElements(response.publicKey, response.planIds);
+      stripeElements(response.publicKey, response.plans);
     });
 }
 
