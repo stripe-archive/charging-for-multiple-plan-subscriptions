@@ -166,33 +166,49 @@ function boostrap() {
       });
 
       // BEGIN TEST HOOK
-      Object.keys(allPlans).forEach((id) => {
-        var checkboxElt = document.createElement('input');
-        checkboxElt.setAttribute('type', 'checkbox')
-
-        var labelElt = document.createElement('label');
-        labelElt.appendChild(checkboxElt);
-        labelElt.innerHTML += `${id}<br>`
+      var buildProductElt = function(plan) {
+        var productNameElt = document.createElement('label');
+        productNameElt.innerHTML = `${plan.animal}`;
 
         var productElt = document.createElement('div');
-        productElt.setAttribute('productId', `${id}`);
-        productElt.appendChild(labelElt);
-        productElt.addEventListener('click', function(evt) {
-          evt.preventDefault();
-          var product = evt.currentTarget;
-          var plan = allPlans[`${product.getAttribute('productId')}`];
-          plan.selected = !plan.selected;
-          var checkbox = product.getElementsByTagName('input')[0];
-          if (checkbox) {
-            checkbox.checked = plan.selected;
-          }
+        productElt.classList.add('product');
+        productElt.appendChild(productNameElt);
+        productElt.setAttribute('planId', `${plan.id}`);
+        return productElt;
+      }
 
-          updatePrice();
-        });
+      var updateProductElt = function(productElt) {
+        var planId = productElt.getAttribute('planId');
+        var plan = allPlans[planId];
+        if (plan.selected) {
+          productElt.classList.add('selected');
+        }
+        else {
+          productElt.classList.remove('selected');
+        }
+      }
 
+      var togglePlan = function(planId) {
+        var plan = allPlans[`${planId}`];
+        plan.selected = !plan.selected;
+        return plan.selected;
+      }
+
+      var handleClick = function(evt) {
+        evt.preventDefault();
+        var productElt = evt.currentTarget;
+        var planId = productElt.getAttribute('planId');
+        togglePlan(planId);
+        updateProductElt(productElt);
+        updatePrice();
+      }
+
+      Object.values(allPlans).forEach((plan) => {
+        var productElt = buildProductElt(plan);
         document
           .getElementById('test-hook-please-ignore')
-          .appendChild(productElt);
+          .appendChild(productElt)
+          .addEventListener('click', handleClick);
       });
       // END TEST HOOK
 

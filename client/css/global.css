@@ -413,6 +413,10 @@ pre {
   display: none;
 }
 
+.product.selected {
+  color: blue;
+}
+
 @keyframes field-in {
   0% {
     opacity: 0;
