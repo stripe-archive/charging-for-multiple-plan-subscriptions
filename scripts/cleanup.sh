@@ -87,7 +87,7 @@ function describe_api_result() {
 }
 
 # Example specific code:
-ANIMALS=("lion" "tiger" "bear" "dog" "cat" "hamster")
+# ANIMALS comes from the .env file
 
 # delete pricing plan (and corresponding service product) for each animal
 for animal in "${ANIMALS[@]}"; do
