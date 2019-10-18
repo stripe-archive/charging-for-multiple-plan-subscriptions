@@ -12,6 +12,8 @@ require './config.php';
 
 $app = new \Slim\App;
 
+$MIN_PLANS_FOR_DISCOUNT = 2;
+
 // Instantiate the logger as a dependency
 $container = $app->getContainer();
 $container['logger'] = function ($c) {
@@ -53,14 +55,14 @@ $app->post('/create-customer', function (Request $request, Response $response, a
     ]
   ]);
 
-  $premiumCouponCode = getenv('PREMIUM_COUPON_ID');
-  $allPlanIds = explode(",", getenv('SUBSCRIPTION_PLAN_IDS'));
-  $coupon = count($allPlanIds) == count($body->plan_ids) ? $premiumCouponCode : null;
+  global $MIN_PLANS_FOR_DISCOUNT;
+  $eligibleForDiscount = count($body->plan_ids) >= $MIN_PLANS_FOR_DISCOUNT;
+  $couponId = $eligibleForDiscount ? getenv('COUPON_ID') : null;
   $subscription = \Stripe\Subscription::create([
     "customer" => $customer['id'],
     "items" => array_map(function ($planId) { return [ "plan" => $planId ]; }, $body->plan_ids),
     "expand" => ['latest_invoice.payment_intent'],
-    "coupon" => $coupon
+    "coupon" => $couponId
   ]);
 
   return $response->withJson($subscription);
