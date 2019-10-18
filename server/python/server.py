@@ -24,30 +24,17 @@ static_dir = str(os.path.abspath(os.path.join(
 app = Flask(__name__, static_folder=static_dir,
             static_url_path="", template_folder=static_dir)
 
-
-def load_plans():
-    plansFilePath = os.getenv('PLANS_FILE_LOCATION')
-    plansJson = Path(plansFilePath).read_text()
-    plans = json.loads(plansJson)
-    return {plan["planId"]: plan for plan in plans}
-
-
-plans = load_plans()
-
-
 @app.route('/', methods=['GET'])
 def get_index():
     return render_template('index.html')
 
 # This endpoint is used by client in client/script.js
 # Returns relevant data about plans using the Stripe API
-@app.route('/bootstrap', methods=['GET'])
-def get_boostrap():
+@app.route('/public-key', methods=['GET'])
+def get_public_key():
     return jsonify(
         publicKey=os.getenv('STRIPE_PUBLIC_KEY'),
-        plans=[plan for plan in plans.values()]
     )
-
 
 @app.route('/create-customer', methods=['POST'])
 def create_customer():
