@@ -12,9 +12,18 @@ import os
 
 from flask import Flask, render_template, jsonify, request, send_from_directory
 from dotenv import load_dotenv, find_dotenv
+from pathlib import Path
 
 static_dir = f'{os.path.abspath(os.path.join(__file__ ,"../../../client"))}'
 app = Flask(__name__, static_folder=static_dir, static_url_path="", template_folder=static_dir)
+
+def load_plans():
+    plansFilePath = os.getenv('PLANS_FILE_LOCATION')
+    plansJson = Path(plansFilePath).read_text()
+    plans = json.loads(plansJson)
+    return { plan["planId"]: plan for plan in plans }
+
+plans = load_plans()
 
 # Setup Stripe python client library
 load_dotenv(find_dotenv())
@@ -25,11 +34,13 @@ stripe.api_version = os.getenv('STRIPE_API_VERSION')
 def get_index():
     return render_template('index.html')
 
+# This endpoint is used by client in client/script.js
+# Returns relevant data about plans using the Stripe API
 @app.route('/bootstrap', methods=['GET'])
 def get_boostrap():
     return jsonify(
         publicKey=os.getenv('STRIPE_PUBLIC_KEY'),
-        planIds=os.getenv('SUBSCRIPTION_PLAN_ID').split(',')
+        plans=[plan for plan in plans.values()]
     )
 
 @app.route('/create-customer', methods=['POST'])
@@ -37,14 +48,25 @@ def create_customer():
     # Reads application/json and returns a response
     data = json.loads(request.data)
     paymentMethod = data['payment_method']
-    print(paymentMethod)
     planIds = data['plan_ids']
-    print(planIds)
-    allPlanIds = os.getenv('SUBSCRIPTION_PLAN_ID').split(',')
-    premiumCouponId = os.getenv('PREMIUM_COUPON_ID')
-    coupon = premiumCouponId if len(planIds) == len(allPlanIds) else None
+    couponId = os.getenv('COUPON_ID')
+
+    # Here we make sure the planIds passed by client are consistent with those
+    # we want to allow.
+    # ** Note that our API does not support combining plans with different billing cycles
+    # or currencies in one subscription. You may also want to check consistency in those
+    # here **
+    if (any([planId for planId in planIds if planId in plans])):
+        return "invalid plan id selected", 400
+
+    # In this example, we apply the coupon if the number of plans purchased by
+    # passes the threshold.
+    minPlansForDiscount = 2
+    coupon = couponId if len(planIds) >= minPlansForDiscount else None
     try:
         # This creates a new Customer and attaches the PaymentMethod in one API call.
+        # At this point, associate the ID of the Customer object with your
+        # own internal representation of a customer, if you have one.
         customer = stripe.Customer.create(
             payment_method=paymentMethod, 
             email=data['email'],
@@ -52,9 +74,6 @@ def create_customer():
                 'default_payment_method':paymentMethod
             }
         )
-        # At this point, associate the ID of the Customer object with your
-        # own internal representation of a customer, if you have one.
-        print(customer)
 
         # Subscribe the user to the subscription created
         subscription = stripe.Subscription.create(

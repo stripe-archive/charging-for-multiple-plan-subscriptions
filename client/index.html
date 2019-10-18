@@ -13,13 +13,17 @@
   </head>
 
   <body>
-    <div class="sr-root">
-      <div class="sr-main">
-        <header class="sr-header">
+
+      <header class="sr-header">
           <div class="sr-header__logo"></div>
         </header>
+
+    <div id="product-selection"></div>
+
+      <div class="sr-main">
+        
         <div class="sr-payment-summary payment-view">
-          <h1 class="order-amount">$14.00</h1>
+          <h1 class="order-amount" id="total-amount">$0</h1>
           <h4>Subscribe to the 3 photo plan</h4>
         </div>        
         <div class="sr-payment-form payment-view">
@@ -63,30 +67,5 @@
           <button onclick="window.location.href='/'">Restart demo</button>
         </div>  
       </div>
-      <div class="sr-content">
-        <div class="pasha-image-stack">
-          <img
-            src="https://picsum.photos/280/320?random=1"
-            width="140"
-            height="160"
-          />
-          <img
-            src="https://picsum.photos/280/320?random=2"
-            width="140"
-            height="160"
-          />
-          <img
-            src="https://picsum.photos/280/320?random=3"
-            width="140"
-            height="160"
-          />
-          <img
-            src="https://picsum.photos/280/320?random=4"
-            width="140"
-            height="160"
-          />
-        </div>
-      </div>
-    </div>
   </body>
 </html>

@@ -56,8 +56,8 @@ app.post('/create-customer', async (req, res) => {
   // Note that our API does not support combining plans with different billing cycles
   // or currencies in one subscription. You may also want to check consistency in those
   // here.
-  requestedPlanIds = req.body.plan_ids;
-  validPlanIds = process.env.SUBSCRIPTION_PLAN_ID.split(',');
+  const requestedPlanIds = req.body.plan_ids;
+  const validPlanIds = process.env.SUBSCRIPTION_PLAN_ID.split(',');
   if (!requestedPlanIds.every(val => validPlanIds.includes(val))) {
     console.log(`⚠️  Client requested subscription with invalid Plan ID.`);
     return res.sendStatus(400);
@@ -65,8 +65,8 @@ app.post('/create-customer', async (req, res) => {
 
   // In this example, we apply the coupon if the number of plans purchased by
   // passes the threshold.
-  eligibleForDiscount = requestedPlanIds.length >= minPlansForDiscount;
-  coupon = eligibleForDiscount ? process.env.COUPON_ID : null;
+  const eligibleForDiscount = requestedPlanIds.length >= minPlansForDiscount;
+  const coupon = eligibleForDiscount ? process.env.COUPON_ID : null;
 
   // At this point, associate the ID of the Customer object with your
   // own internal representation of a customer, if you have one.

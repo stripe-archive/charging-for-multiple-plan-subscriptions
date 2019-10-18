@@ -1,9 +1,10 @@
 var stripe;
-var allPlanIds;
+var allPlans = {};
+var minPlansForDiscount = 2;
+var discountFactor = .8;
 
-var stripeElements = function(publicKey, plans) {
+var stripeElements = function(publicKey) {
   stripe = Stripe(publicKey);
-  allPlanIds = plans.map(plan => plan.id)
   var elements = stripe.elements();
 
   // Element styles
@@ -61,12 +62,35 @@ var pay = function(stripe, card) {
           errorMsg.textContent = '';
         }, 4000);
       } else {
-        createCustomer(result.paymentMethod.id, cardholderEmail, allPlanIds /* TODO: replace with customer input */);
+        createCustomer(result.paymentMethod.id, cardholderEmail);
       }
     });
 };
 
-function createCustomer(paymentMethod, cardholderEmail, planIds) {
+var computePrice = function() {
+  var selectedPlans = getSelectedPlans();
+  var total = selectedPlans
+    .map(plan => plan.price)
+    .reduce((plan1, plan2) => plan1 + plan2, 0);
+  var eligibleForDiscount = selectedPlans.length >= minPlansForDiscount;
+  if (eligibleForDiscount) {
+    total *= discountFactor;
+  }
+
+  // price from server is in cents
+  return total / 100;
+}
+
+var updatePrice = function() {
+  var price = computePrice();
+  document.getElementById('total-amount').innerHTML = `\$${price}`;
+}
+
+var getSelectedPlans = function() {
+  return Object.values(allPlans).filter(plan => plan.selected);
+}
+
+function createCustomer(paymentMethod, cardholderEmail) {
   return fetch('/create-customer', {
     method: 'post',
     headers: {
@@ -75,7 +99,7 @@ function createCustomer(paymentMethod, cardholderEmail, planIds) {
     body: JSON.stringify({
       email: cardholderEmail,
       payment_method: paymentMethod,
-      plan_ids: planIds
+      plan_ids: getSelectedPlans().map(plan => plan.id)
     })
   })
     .then(response => {
@@ -136,12 +160,56 @@ function bootstrap() {
     .then(function(response) {
       return response.json();
     })
-    .then(function(response) {
-      stripeElements(response.publicKey, response.plans);
+    .then(function(json) {
+      json.plans.forEach(function(plan) {
+        plan.selected = false;
+        allPlans[plan.planId] = plan;
+      });
+      generateHtmlForPlansPage();
+      stripeElements(json.publicKey);
     });
 }
 
 bootstrap();
+
+function generateHtmlForPlansPage(){
+  function generateHtmlForSinglePlan(id, animal, price, url){
+    result = `
+      <div class="sr-animal">
+        <img
+          class="sr-animal-pic product"
+          src=\'${url}\'
+          width="140"
+          height="160"
+          id=\'${id}\'
+          onclick="toggleAnimal(\'${id}\')"
+        />
+        <div class="sr-animal-text">${animal}</div>
+        <div class="sr-animal-text">$${price / 100}</div>
+      </div>
+      `;
+    return result;
+  }
+  var html = '';
+  Object.values(allPlans).forEach((plan) => {
+    html += generateHtmlForSinglePlan(plan.planId, plan.title, plan.price, plan.image);
+  });
+
+  document.getElementById('product-selection').innerHTML += html;
+}
+
+function toggleAnimal(id){
+  allPlans[id].selected = !allPlans[id].selected;
+  var productElt = document.getElementById(id);
+  if (allPlans[id].selected) {
+    productElt.classList.add('selected');
+  }
+  else {
+    productElt.classList.remove('selected');
+  }
+
+  updatePrice();
+}
 
 /* ------- Post-payment helpers ------- */
 

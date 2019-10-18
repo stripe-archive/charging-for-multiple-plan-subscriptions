@@ -312,6 +312,35 @@ pre {
   padding-top: 12px;
 }
 
+.sr-animals {
+  display: flex;
+  flex-wrap: wrap;
+  width: 700px;
+  margin: 20px;
+}
+
+.sr-animal {
+  width: 200px;
+  border: 1px solid rgb(232, 232, 232);
+  border-radius: 6px;
+  text-align: center;
+  margin: 10px;
+  padding: 5px;
+}
+
+.sr-animal-pic {
+  margin: 20px;
+}
+
+.sr-animal-text {
+  color: rgb(153, 153, 153);
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: 0px;
+  line-height: 14px;
+  margin: 5px;
+}
+
 /* Responsiveness */
 @media (max-width: 720px) {
   .sr-root {
@@ -411,6 +440,14 @@ pre {
 }
 .hidden {
   display: none;
+}
+
+.product {
+  opacity: .5
+}
+
+.product.selected {
+  opacity: 1
 }
 
 @keyframes field-in {
