@@ -9,7 +9,6 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const fs = require('fs');
 
 const minPlansForDiscount = 2;
-const validPlanIds = new Set(process.env.SUBSCRIPTION_PLAN_ID.split(','));
 
 app.use(express.static(process.env.STATIC_DIR));
 
@@ -46,17 +45,6 @@ app.post('/create-customer', async (req, res) => {
       default_payment_method: req.body.payment_method
     }
   });
-
-  // Here we make sure the planIds passed by client are consistent with those
-  // we want to allow.
-  // Note that our API does not support combining plans with different billing cycles
-  // or currencies in one subscription. You may also want to check consistency in those
-  // here.
-  const requestedPlanIds = req.body.plan_ids;
-  if (!requestedPlanIds.every(val => validPlanIds.has(val))) {
-    console.log(`⚠️  Client requested subscription with invalid Plan ID.`);
-    return res.sendStatus(400);
-  }
 
   // In this example, we apply the coupon if the number of plans purchased by
   // passes the threshold.

@@ -42,18 +42,6 @@ post '/create-customer' do
     }
   )
 
-  # Here we make sure the planIds passed by client are consistent with those
-  # we want to allow.
-  # Note that our API does not support combining plans with different billing cycles
-  # or currencies in one subscription. You may also want to check consistency in those
-  # here
-  requestedPlanIds = data['plan_ids']
-  if !requestedPlanIds.all?{|planId| validPlanIds.include?(planId)}
-    puts "⚠️  Client requested subscription with invalid Plan ID"
-    status 400
-    return
-  end
-
   # In this example, we apply the coupon if the number of plans purchased by
   # passes the threshold.
   couponId = ENV['COUPON_ID']
