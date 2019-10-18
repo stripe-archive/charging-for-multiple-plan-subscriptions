@@ -1,8 +1,6 @@
 require 'stripe'
 require 'sinatra'
 require 'dotenv'
-require 'json'
-require 'set'
 
 # Replace if using a different env file or config
 ENV_PATH = '/../../.env'.freeze
@@ -16,7 +14,6 @@ set :port, 4242
 
 # Number of coupons required to get a discount in this example.
 minPlansForDiscount = 2
-validPlanIds = ENV['SUBSCRIPTION_PLAN_ID'].split(',').to_set
 
 get '/' do
   content_type 'text/html'
@@ -50,11 +47,10 @@ post '/create-customer' do
 
   # In this example, we apply the coupon if the number of plans purchased by
   # passes the threshold.
-  couponId = ENV['COUPON_ID']
-  eligibleForDiscount = requestedPlanIds.length >= minPlansForDiscount
-  coupon = eligibleForDiscount ? couponId : nil
-
   planIds = data['plan_ids']
+  couponId = ENV['COUPON_ID']
+  eligibleForDiscount = planIds.length >= minPlansForDiscount
+  coupon = eligibleForDiscount ? couponId : nil
   subscription = Stripe::Subscription.create(
     customer: customer.id,
     items: planIds.map{|planId| { plan: planId }}.compact,

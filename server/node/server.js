@@ -6,7 +6,6 @@ const ENV_PATH = '../../.env';
 const envPath = resolve(ENV_PATH);
 const env = require('dotenv').config({ path: envPath });
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-const fs = require('fs');
 
 const minPlansForDiscount = 2;
 
@@ -46,12 +45,12 @@ app.post('/create-customer', async (req, res) => {
 
   // In this example, we apply the coupon if the number of plans purchased 
   // passes the threshold.
-  const eligibleForDiscount = requestedPlanIds.length >= minPlansForDiscount;
+  planIds = req.body.plan_ids;
+  const eligibleForDiscount = planIds.length >= minPlansForDiscount;
   const coupon = eligibleForDiscount ? process.env.COUPON_ID : null;
 
   // At this point, associate the ID of the Customer object with your
   // own internal representation of a customer, if you have one.
-  planIds = req.body.plan_ids;
   const subscription = await stripe.subscriptions.create({
     customer: customer.id,
     items: planIds.map(planId => { return {plan: planId} }),
