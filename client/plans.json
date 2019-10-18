@@ -3,36 +3,36 @@
         "planId": "stripeDemo_lion_plan",
         "price": 1000,
         "title": "lion",
-        "display": "🦁"
+        "emoji": "🦁"
     },
     {
         "planId": "stripeDemo_tiger_plan",
         "price": 2000,
         "title": "tiger",
-        "display": "🐯"
+        "emoji": "🐯"
     },
     {
         "planId": "stripeDemo_bear_plan",
         "price": 3000,
         "title": "bear",
-        "display": "🐻"
+        "emoji": "🐻"
     },
     {
         "planId": "stripeDemo_dog_plan",
         "price": 20000,
         "title": "dog",
-        "display": "🐶"
+        "emoji": "🐶"
     },
     {
         "planId": "stripeDemo_cat_plan",
         "price": 30000,
         "title": "dog",
-        "display": "🐱"
+        "emoji": "🐱"
     },
     {
         "planId": "stripeDemo_hamster_plan",
         "price": 100000,
         "title": "hamster",
-        "display": "🐹"
+        "emoji": "🐹"
     }
 ]

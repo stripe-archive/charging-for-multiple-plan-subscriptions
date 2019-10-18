@@ -188,7 +188,7 @@ bootstrap();
 bootstrapPlans();
 
 function generateHtmlForPlansPage(){
-  function generateHtmlForSinglePlan(id, animal, price, display){
+  function generateHtmlForSinglePlan(id, animal, price, emoji){
     result = `
       <div>
         <div class="sr-animal">
@@ -198,7 +198,7 @@ function generateHtmlForPlansPage(){
             id=\'${id}\'
             onclick="toggleAnimal(\'${id}\')"
             class="product">
-              ${display}
+              ${emoji}
             </p>
           <div class="sr-animal-text">${animal}</div>
           <div class="sr-animal-text">$${price / 100}</div>
@@ -209,7 +209,7 @@ function generateHtmlForPlansPage(){
   }
   var html = '';
   Object.values(allPlans).forEach((plan) => {
-    html += generateHtmlForSinglePlan(plan.planId, plan.title, plan.price, plan.display);
+    html += generateHtmlForSinglePlan(plan.planId, plan.title, plan.price, plan.emoji);
   });
 
   document.getElementById('product-selection').innerHTML += html;
