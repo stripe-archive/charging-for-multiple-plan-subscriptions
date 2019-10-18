@@ -6,6 +6,9 @@ const ENV_PATH = '../../.env';
 const envPath = resolve(ENV_PATH);
 const env = require('dotenv').config({ path: envPath });
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const fs = require('fs');
+
+const minPlansForDiscount = 2;
 
 app.use(express.static(process.env.STATIC_DIR));
 
@@ -27,7 +30,14 @@ app.get('/', (req, res) => {
 });
 
 app.get('/bootstrap', (req, res) => {
-  res.send({ publicKey: process.env.STRIPE_PUBLIC_KEY, planIds: [process.env.SUBSCRIPTION_PLAN_ID] });
+  // For this example, we read metadata about plans
+  // from disk to send back to client.
+  let plans = fs.readFileSync(process.env.PLANS_SOURCE_FILE, 'utf8');
+  console.log(plans);
+  res.send({
+    publicKey: process.env.STRIPE_PUBLIC_KEY,
+    plans: JSON.parse(plans)
+  });
 });
 
 app.post('/create-customer', async (req, res) => {
@@ -40,12 +50,31 @@ app.post('/create-customer', async (req, res) => {
       default_payment_method: req.body.payment_method
     }
   });
+
+  // Here we make sure the planIds passed by client are consistent with those
+  // we want to allow.
+  // Note that our API does not support combining plans with different billing cycles
+  // or currencies in one subscription. You may also want to check consistency in those
+  // here.
+  requestedPlanIds = req.body.plan_ids;
+  validPlanIds = process.env.SUBSCRIPTION_PLAN_ID.split(',');
+  if (!requestedPlanIds.every(val => validPlanIds.includes(val))) {
+    console.log(`⚠️  Client requested subscription with invalid Plan ID.`);
+    return res.sendStatus(400);
+  }
+
+  // In this example, we apply the coupon if the number of plans purchased by
+  // passes the threshold.
+  eligibleForDiscount = requestedPlanIds.length >= minPlansForDiscount;
+  coupon = eligibleForDiscount ? process.env.COUPON_ID : null;
+
   // At this point, associate the ID of the Customer object with your
   // own internal representation of a customer, if you have one.
   const subscription = await stripe.subscriptions.create({
     customer: customer.id,
-    items: [{ plan: process.env.SUBSCRIPTION_PLAN_ID }],
-    expand: ['latest_invoice.payment_intent']
+    items: requestedPlanIds.map(planId => {plan: planId}),
+    expand: ['latest_invoice.payment_intent'],
+    coupon: coupon,
   });
 
   res.send(subscription);

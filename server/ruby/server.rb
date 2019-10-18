@@ -1,6 +1,7 @@
 require 'stripe'
 require 'sinatra'
 require 'dotenv'
+require 'json'
 
 Dotenv.load(File.dirname(__FILE__) + '/../../.env')
 Stripe.api_key = ENV['STRIPE_SECRET_KEY']
@@ -22,19 +23,19 @@ end
 get '/bootstrap' do
   content_type 'application/json'
 
-  planIds = ENV['SUBSCRIPTION_PLAN_ID'].split(',')
-  plans = []
-  for id in planIds do
-    # See https://site-admin.stripe.com/docs/api/plans?lang=ruby for more
-    # about retrieving and using Plans.
-    plan = Stripe::Plan.retrieve(id)
-    plans.push({
-      id: plan['id'],
-      price: plan['amount'],
-      animal: plan['metadata']['animal'],
-      imageURL: plan['metadata']['imageURL']
-    })
-  end
+  # planIds = ENV['SUBSCRIPTION_PLAN_ID'].split(',')
+  plans = JSON.parse(File.read(ENV['PLANS_SOURCE_FILE']))
+  # for id in planIds do
+  #   # See https://site-admin.stripe.com/docs/api/plans?lang=ruby for more
+  #   # about retrieving and using Plans.
+  #   plan = Stripe::Plan.retrieve(id)
+  #   plans.push({
+  #     id: plan['id'],
+  #     price: plan['amount'],
+  #     animal: plan['metadata']['animal'],
+  #     imageURL: plan['metadata']['imageURL']
+  #   })
+  # end
 
   {
     'publicKey': ENV['STRIPE_PUBLIC_KEY'],
@@ -59,9 +60,9 @@ post '/create-customer' do
 
   # Here we make sure the planIds passed by client are consistent with those
   # we want to allow.
-  # ** Note that our API does not support combining plans with different billing cycles
+  # Note that our API does not support combining plans with different billing cycles
   # or currencies in one subscription. You may also want to check consistency in those
-  # here **
+  # here
   requestedPlanIds = data['plan_ids']
   validPlanIds = ENV['SUBSCRIPTION_PLAN_ID'].split(',')
   validRequestedPlanIds = requestedPlanIds & validPlanIds # intersection of lists
