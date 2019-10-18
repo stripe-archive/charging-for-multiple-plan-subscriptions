@@ -192,14 +192,11 @@ function generateHtmlForPlansPage(){
     result = `
       <div>
         <div class="sr-animal">
-          <p style="font-size:20vw;
-            color:rgba(0, 0, 0, 0.99);
-            margin:0px;"
+          <div class="product"
             id=\'${id}\'
-            onclick="toggleAnimal(\'${id}\')"
-            class="product">
+            onclick="toggleAnimal(\'${id}\')">
               ${emoji}
-            </p>
+          </div>
           <div class="sr-animal-text">${animal}</div>
           <div class="sr-animal-text">$${price / 100}</div>
         </div>

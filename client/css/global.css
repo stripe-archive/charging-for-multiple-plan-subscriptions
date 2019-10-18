@@ -443,11 +443,14 @@ pre {
 }
 
 .product {
-  opacity: .5
+  font-size:20vw;
+  color:rgba(0, 0, 0, 0.99);
+  margin:0px;
+  opacity: .5;
 }
 
 .product.selected {
-  opacity: 1
+  opacity: 1;
 }
 
 @keyframes field-in {
