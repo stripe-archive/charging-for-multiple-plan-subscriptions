@@ -150,8 +150,8 @@ function confirmSubscription(subscriptionId) {
     });
 }
 
-function bootstrap() {
-  return fetch('/bootstrap', {
+function getPublicKey() {
+  return fetch('/public-key', {
     method: 'get',
     headers: {
       'Content-Type': 'application/json'
@@ -161,38 +161,52 @@ function bootstrap() {
       return response.json();
     })
     .then(function(json) {
-      json.plans.forEach(function(plan) {
-        plan.selected = false;
-        allPlans[plan.planId] = plan;
-      });
-      generateHtmlForPlansPage();
       stripeElements(json.publicKey);
     });
 }
 
-bootstrap();
+function getPlans() {
+  return fetch('/plans.json', {
+    method: 'get',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  })
+    .then(function(response) {
+      return response.json();
+    })
+    .then(function(json) {
+      json.forEach(function(plan) {
+        plan.selected = false;
+        allPlans[plan.planId] = plan;
+      });
+      generateHtmlForPlansPage();
+    });
+}
+
+getPublicKey();
+getPlans();
 
 function generateHtmlForPlansPage(){
-  function generateHtmlForSinglePlan(id, animal, price, url){
+  function generateHtmlForSinglePlan(id, animal, price, emoji){
     result = `
-      <div class="sr-animal">
-        <img
-          class="sr-animal-pic product"
-          src=\'${url}\'
-          width="140"
-          height="160"
-          id=\'${id}\'
-          onclick="toggleAnimal(\'${id}\')"
-        />
-        <div class="sr-animal-text">${animal}</div>
-        <div class="sr-animal-text">$${price / 100}</div>
+      <div>
+        <div class="sr-animal">
+          <div class="product"
+            id=\'${id}\'
+            onclick="toggleAnimal(\'${id}\')">
+              ${emoji}
+          </div>
+          <div class="sr-animal-text">${animal}</div>
+          <div class="sr-animal-text">$${price / 100}</div>
+        </div>
       </div>
       `;
     return result;
   }
   var html = '';
   Object.values(allPlans).forEach((plan) => {
-    html += generateHtmlForSinglePlan(plan.planId, plan.title, plan.price, plan.image);
+    html += generateHtmlForSinglePlan(plan.planId, plan.title, plan.price, plan.emoji);
   });
 
   document.getElementById('product-selection').innerHTML += html;

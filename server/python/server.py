@@ -14,21 +14,15 @@ from flask import Flask, render_template, jsonify, request, send_from_directory
 from dotenv import load_dotenv, find_dotenv
 from pathlib import Path
 
-static_dir = f'{os.path.abspath(os.path.join(__file__ ,"../../../client"))}'
-app = Flask(__name__, static_folder=static_dir, static_url_path="", template_folder=static_dir)
-
-def load_plans():
-    plansFilePath = os.getenv('PLANS_FILE_LOCATION')
-    plansJson = Path(plansFilePath).read_text()
-    plans = json.loads(plansJson)
-    return { plan["planId"]: plan for plan in plans }
-
-plans = load_plans()
-
 # Setup Stripe python client library
 load_dotenv(find_dotenv())
 stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
 stripe.api_version = os.getenv('STRIPE_API_VERSION')
+
+static_dir = str(os.path.abspath(os.path.join(
+    __file__, "..", os.getenv("STATIC_DIR"))))
+app = Flask(__name__, static_folder=static_dir,
+            static_url_path="", template_folder=static_dir)
 
 @app.route('/', methods=['GET'])
 def get_index():
@@ -36,11 +30,10 @@ def get_index():
 
 # This endpoint is used by client in client/script.js
 # Returns relevant data about plans using the Stripe API
-@app.route('/bootstrap', methods=['GET'])
-def get_boostrap():
+@app.route('/public-key', methods=['GET'])
+def get_public_key():
     return jsonify(
         publicKey=os.getenv('STRIPE_PUBLIC_KEY'),
-        plans=[plan for plan in plans.values()]
     )
 
 @app.route('/create-customer', methods=['POST'])
@@ -68,10 +61,10 @@ def create_customer():
         # At this point, associate the ID of the Customer object with your
         # own internal representation of a customer, if you have one.
         customer = stripe.Customer.create(
-            payment_method=paymentMethod, 
+            payment_method=paymentMethod,
             email=data['email'],
             invoice_settings={
-                'default_payment_method':paymentMethod
+                'default_payment_method': paymentMethod
             }
         )
 
@@ -86,6 +79,7 @@ def create_customer():
     except Exception as e:
         return jsonify(e), 403
 
+
 @app.route('/subscription', methods=['POST'])
 def getSubscription():
     # Reads application/json and returns a response
@@ -95,6 +89,7 @@ def getSubscription():
         return jsonify(subscription)
     except Exception as e:
         return jsonify(e), 403
+
 
 @app.route('/webhook', methods=['POST'])
 def webhook_received():
@@ -119,7 +114,7 @@ def webhook_received():
         event_type = request_data['type']
 
     data_object = data['object']
-    
+
     if event_type == 'customer.created':
         print(data)
 
@@ -147,5 +142,5 @@ def webhook_received():
     return jsonify({'status': 'success'})
 
 
-if __name__== '__main__':
+if __name__ == '__main__':
     app.run(port=4242)

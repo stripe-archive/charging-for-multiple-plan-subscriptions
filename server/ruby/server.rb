@@ -4,11 +4,14 @@ require 'dotenv'
 require 'json'
 require 'set'
 
-Dotenv.load(File.dirname(__FILE__) + '/../../.env')
+# Replace if using a different env file or config
+ENV_PATH = '/../../.env'.freeze
+Dotenv.load(File.dirname(__FILE__) + ENV_PATH)
 Stripe.api_key = ENV['STRIPE_SECRET_KEY']
 
+
 set :static, true
-set :public_folder, File.join(File.dirname(__FILE__), '../../client/')
+set :public_folder, File.join(File.dirname(__FILE__), ENV['STATIC_DIR'])
 set :port, 4242
 
 # Number of coupons required to get a discount in this example.
@@ -20,10 +23,13 @@ get '/' do
   send_file File.join(settings.public_folder, 'index.html')
 end
 
-get '/bootstrap' do
+# This endpoint is used by client in client/script.js
+# Returns relevant data about plans using the Stripe API
+get '/public-key' do
   content_type 'application/json'
+
   {
-    'publicKey': ENV['STRIPE_PUBLIC_KEY']
+    'publicKey': ENV['STRIPE_PUBLIC_KEY'],
   }.to_json
 end
 
@@ -48,9 +54,10 @@ post '/create-customer' do
   eligibleForDiscount = requestedPlanIds.length >= minPlansForDiscount
   coupon = eligibleForDiscount ? couponId : nil
 
+  planIds = data['plan_ids']
   subscription = Stripe::Subscription.create(
     customer: customer.id,
-    items: requestedPlanIds.map{|planId| { plan: planId }}.compact,
+    items: planIds.map{|planId| { plan: planId }}.compact,
     expand: ['latest_invoice.payment_intent'],
     coupon: coupon,
   )

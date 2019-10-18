@@ -29,10 +29,8 @@ app.get('/', (req, res) => {
   res.sendFile(path);
 });
 
-app.get('/bootstrap', (req, res) => {
-  res.send({
-    publicKey: process.env.STRIPE_PUBLIC_KEY
-  });
+app.get('/public-key', (req, res) => {
+  res.send({ publicKey: process.env.STRIPE_PUBLIC_KEY });
 });
 
 app.post('/create-customer', async (req, res) => {
@@ -46,16 +44,17 @@ app.post('/create-customer', async (req, res) => {
     }
   });
 
-  // In this example, we apply the coupon if the number of plans purchased by
+  // In this example, we apply the coupon if the number of plans purchased 
   // passes the threshold.
   const eligibleForDiscount = requestedPlanIds.length >= minPlansForDiscount;
   const coupon = eligibleForDiscount ? process.env.COUPON_ID : null;
 
   // At this point, associate the ID of the Customer object with your
   // own internal representation of a customer, if you have one.
+  planIds = req.body.plan_ids;
   const subscription = await stripe.subscriptions.create({
     customer: customer.id,
-    items: requestedPlanIds.map(planId => { return {plan: planId} }),
+    items: planIds.map(planId => { return {plan: planId} }),
     expand: ['latest_invoice.payment_intent'],
     coupon: coupon,
   });

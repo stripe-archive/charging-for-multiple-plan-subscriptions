@@ -8,7 +8,6 @@ $ENV_PATH = '../..';
 $dotenv = Dotenv\Dotenv::create(realpath($ENV_PATH));
 $dotenv->load();
 
-
 require './config.php';
 
 $app = new \Slim\App;
@@ -22,6 +21,7 @@ $container['logger'] = function ($c) {
   $logger->pushHandler(new Monolog\Handler\StreamHandler(__DIR__ . '/logs/app.log', \Monolog\Logger::DEBUG));
   return $logger;
 };
+
 $app->add(function ($request, $response, $next) {
     Stripe::setApiKey(getenv('STRIPE_SECRET_KEY'));
     return $next($request, $response);
@@ -32,12 +32,11 @@ $app->get('/', function (Request $request, Response $response, array $args) {
   return $response->write(file_get_contents('../../client/index.html'));
 });
 
-$app->get('/bootstrap', function (Request $request, Response $response, array $args) {
+$app->get('/public-key', function (Request $request, Response $response, array $args) {
   $pub_key = getenv('STRIPE_PUBLIC_KEY');
-  $plan_ids = explode(",", getenv('SUBSCRIPTION_PLAN_ID'));
   
   // Send public key details to client
-  return $response->withJson(array('publicKey' => $pub_key, 'planIds' => $plan_ids));
+  return $response->withJson(array('publicKey' => $pub_key));
 });
 
 $app->post('/create-customer', function (Request $request, Response $response, array $args) {
@@ -55,7 +54,7 @@ $app->post('/create-customer', function (Request $request, Response $response, a
   ]);
 
   $premiumCouponCode = getenv('PREMIUM_COUPON_ID');
-  $allPlanIds = explode(",", getenv('SUBSCRIPTION_PLAN_ID'));
+  $allPlanIds = explode(",", getenv('SUBSCRIPTION_PLAN_IDS'));
   $coupon = count($allPlanIds) == count($body->plan_ids) ? $premiumCouponCode : null;
   $subscription = \Stripe\Subscription::create([
     "customer" => $customer['id'],
