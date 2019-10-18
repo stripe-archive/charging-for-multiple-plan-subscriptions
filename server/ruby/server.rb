@@ -22,26 +22,11 @@ end
 
 # This endpoint is used by client in client/script.js
 # Returns relevant data about plans using the Stripe API
-get '/bootstrap' do
+get '/public-key' do
   content_type 'application/json'
-
-  planIds = ENV['SUBSCRIPTION_PLAN_IDS'].split(',')
-  plans = []
-  for id in planIds do
-    # See https://site-admin.stripe.com/docs/api/plans?lang=ruby for more
-    # about retrieving and using Plans.
-    plan = Stripe::Plan.retrieve(id)
-    plans.push({
-      id: plan['id'],
-      price: plan['amount'],
-      animal: plan['metadata']['animal'],
-      imageURL: plan['metadata']['imageURL']
-    })
-  end
 
   {
     'publicKey': ENV['STRIPE_PUBLIC_KEY'],
-    'plans': plans
   }.to_json
 end
 
@@ -66,7 +51,7 @@ post '/create-customer' do
   # or currencies in one subscription. You may also want to check consistency in those
   # here **
   requestedPlanIds = data['plan_ids']
-  validPlanIds = ENV['SUBSCRIPTION_PLAN_ID'].split(',')
+  validPlanIds = ENV['SUBSCRIPTION_PLAN_IDS'].split(',')
   validRequestedPlanIds = requestedPlanIds & validPlanIds # intersection of lists
   if validRequestedPlanIds.length != requestedPlanIds.length
     puts "⚠️  Client requested subscription with invalid Plan ID"

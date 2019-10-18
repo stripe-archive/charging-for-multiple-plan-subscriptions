@@ -150,8 +150,8 @@ function confirmSubscription(subscriptionId) {
     });
 }
 
-function bootstrap() {
-  return fetch('/bootstrap', {
+function getPublicKey() {
+  return fetch('/public-key', {
     method: 'get',
     headers: {
       'Content-Type': 'application/json'
@@ -165,7 +165,7 @@ function bootstrap() {
     });
 }
 
-function bootstrapPlans() {
+function getPlans() {
   return fetch('/plans.json', {
     method: 'get',
     headers: {
@@ -184,8 +184,8 @@ function bootstrapPlans() {
     });
 }
 
-bootstrap();
-bootstrapPlans();
+getPublicKey();
+getPlans();
 
 function generateHtmlForPlansPage(){
   function generateHtmlForSinglePlan(id, animal, price, emoji){

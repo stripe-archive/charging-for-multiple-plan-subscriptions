@@ -26,8 +26,8 @@ app.get('/', (req, res) => {
   res.sendFile(path);
 });
 
-app.get('/bootstrap', (req, res) => {
-  res.send({ publicKey: process.env.STRIPE_PUBLIC_KEY, planIds: process.env.SUBSCRIPTION_PLAN_ID.split(',') });
+app.get('/public-key', (req, res) => {
+  res.send({ publicKey: process.env.STRIPE_PUBLIC_KEY });
 });
 
 app.post('/create-customer', async (req, res) => {
@@ -41,7 +41,7 @@ app.post('/create-customer', async (req, res) => {
     }
   });
 
-  const allPlanIds = process.env.SUBSCRIPTION_PLAN_ID.split(',');
+  const allPlanIds = process.env.SUBSCRIPTION_PLAN_IDS.split(',');
   const coupon = req.body.plan_ids.length == allPlanIds.length ? process.env.PREMIUM_COUPON_ID : null;
 
   // At this point, associate the ID of the Customer object with your
