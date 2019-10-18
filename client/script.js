@@ -188,26 +188,25 @@ bootstrap();
 bootstrapPlans();
 
 function generateHtmlForPlansPage(){
-  function generateHtmlForSinglePlan(id, animal, price, url){
+  function generateHtmlForSinglePlan(id, animal, price, emoji){
     result = `
-      <div class="sr-animal">
-        <img
-          class="sr-animal-pic product"
-          src=\'${url}\'
-          width="140"
-          height="160"
-          id=\'${id}\'
-          onclick="toggleAnimal(\'${id}\')"
-        />
-        <div class="sr-animal-text">${animal}</div>
-        <div class="sr-animal-text">$${price / 100}</div>
+      <div>
+        <div class="sr-animal">
+          <div class="product"
+            id=\'${id}\'
+            onclick="toggleAnimal(\'${id}\')">
+              ${emoji}
+          </div>
+          <div class="sr-animal-text">${animal}</div>
+          <div class="sr-animal-text">$${price / 100}</div>
+        </div>
       </div>
       `;
     return result;
   }
   var html = '';
   Object.values(allPlans).forEach((plan) => {
-    html += generateHtmlForSinglePlan(plan.planId, plan.title, plan.price, plan.image);
+    html += generateHtmlForSinglePlan(plan.planId, plan.title, plan.price, plan.emoji);
   });
 
   document.getElementById('product-selection').innerHTML += html;
