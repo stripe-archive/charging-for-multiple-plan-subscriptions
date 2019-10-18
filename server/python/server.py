@@ -57,8 +57,8 @@ def create_customer():
             }
         )
 
-        # In this example, we apply the coupon if the number of plans purchased by
-        # passes the threshold.
+        # In this example, we apply the coupon if the number of plans purchased
+        # meets or exceeds the threshold.
         eligibleForDiscount = len(planIds) >= MIN_PLANS_FOR_DISCOUNT
         coupon = os.getenv('COUPON_ID') if eligibleForDiscount else None
 

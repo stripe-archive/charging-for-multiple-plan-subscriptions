@@ -45,8 +45,8 @@ post '/create-customer' do
     }
   )
 
-  # In this example, we apply the coupon if the number of plans purchased by
-  # passes the threshold.
+  # In this example, we apply the coupon if the number of plans purchased
+  # meets or exceeds the threshold.
   planIds = data['plan_ids']
   couponId = ENV['COUPON_ID']
   eligibleForDiscount = planIds.length >= MIN_PLANS_FOR_DISCOUNT
