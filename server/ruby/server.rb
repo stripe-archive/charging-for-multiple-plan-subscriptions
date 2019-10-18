@@ -13,7 +13,7 @@ set :public_folder, File.join(File.dirname(__FILE__), ENV['STATIC_DIR'])
 set :port, 4242
 
 # Number of coupons required to get a discount in this example.
-minPlansForDiscount = 2
+MIN_PLANS_FOR_DISCOUNT = 2
 
 get '/' do
   content_type 'text/html'
@@ -45,29 +45,15 @@ post '/create-customer' do
     }
   )
 
-  # Here we make sure the planIds passed by client are consistent with those
-  # we want to allow.
-  # ** Note that our API does not support combining plans with different billing cycles
-  # or currencies in one subscription. You may also want to check consistency in those
-  # here **
-  requestedPlanIds = data['plan_ids']
-  validPlanIds = ENV['SUBSCRIPTION_PLAN_IDS'].split(',')
-  validRequestedPlanIds = requestedPlanIds & validPlanIds # intersection of lists
-  if validRequestedPlanIds.length != requestedPlanIds.length
-    puts "⚠️  Client requested subscription with invalid Plan ID"
-    status 400
-    return
-  end
-
-  # In this example, we apply the coupon if the number of plans purchased by
-  # passes the threshold.
+  # In this example, we apply the coupon if the number of plans purchased
+  # meets or exceeds the threshold.
+  planIds = data['plan_ids']
   couponId = ENV['COUPON_ID']
-  eligibleForDiscount = requestedPlanIds.length >= minPlansForDiscount
+  eligibleForDiscount = planIds.length >= MIN_PLANS_FOR_DISCOUNT
   coupon = eligibleForDiscount ? couponId : nil
-
   subscription = Stripe::Subscription.create(
     customer: customer.id,
-    items: requestedPlanIds.map{|planId| { plan: planId }}.compact,
+    items: planIds.map{|planId| { plan: planId }}.compact,
     expand: ['latest_invoice.payment_intent'],
     coupon: coupon,
   )

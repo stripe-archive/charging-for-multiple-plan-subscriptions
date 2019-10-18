@@ -24,6 +24,8 @@ static_dir = str(os.path.abspath(os.path.join(
 app = Flask(__name__, static_folder=static_dir,
             static_url_path="", template_folder=static_dir)
 
+MIN_PLANS_FOR_DISCOUNT = 2
+
 @app.route('/', methods=['GET'])
 def get_index():
     return render_template('index.html')
@@ -38,25 +40,12 @@ def get_public_key():
 
 @app.route('/create-customer', methods=['POST'])
 def create_customer():
-    # Reads application/json and returns a response
-    data = json.loads(request.data)
-    paymentMethod = data['payment_method']
-    planIds = data['plan_ids']
-    couponId = os.getenv('COUPON_ID')
-
-    # Here we make sure the planIds passed by client are consistent with those
-    # we want to allow.
-    # ** Note that our API does not support combining plans with different billing cycles
-    # or currencies in one subscription. You may also want to check consistency in those
-    # here **
-    if (any([planId for planId in planIds if planId in plans])):
-        return "invalid plan id selected", 400
-
-    # In this example, we apply the coupon if the number of plans purchased by
-    # passes the threshold.
-    minPlansForDiscount = 2
-    coupon = couponId if len(planIds) >= minPlansForDiscount else None
     try:
+        # Reads application/json and returns a response
+        data = json.loads(request.data)
+        paymentMethod = data['payment_method']
+        planIds = data['plan_ids']
+
         # This creates a new Customer and attaches the PaymentMethod in one API call.
         # At this point, associate the ID of the Customer object with your
         # own internal representation of a customer, if you have one.
@@ -67,6 +56,11 @@ def create_customer():
                 'default_payment_method': paymentMethod
             }
         )
+
+        # In this example, we apply the coupon if the number of plans purchased
+        # meets or exceeds the threshold.
+        eligibleForDiscount = len(planIds) >= MIN_PLANS_FOR_DISCOUNT
+        coupon = os.getenv('COUPON_ID') if eligibleForDiscount else None
 
         # Subscribe the user to the subscription created
         subscription = stripe.Subscription.create(

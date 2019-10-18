@@ -7,6 +7,8 @@ const envPath = resolve(ENV_PATH);
 const env = require('dotenv').config({ path: envPath });
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
+const MIN_PLANS_FOR_DISCOUNT = 2;
+
 app.use(express.static(process.env.STATIC_DIR));
 
 app.use(
@@ -41,16 +43,19 @@ app.post('/create-customer', async (req, res) => {
     }
   });
 
-  const allPlanIds = process.env.SUBSCRIPTION_PLAN_IDS.split(',');
-  const coupon = req.body.plan_ids.length == allPlanIds.length ? process.env.PREMIUM_COUPON_ID : null;
+  // In this example, we apply the coupon if the number of plans purchased 
+  // meets or exceeds the threshold.
+  planIds = req.body.plan_ids;
+  const eligibleForDiscount = planIds.length >= MIN_PLANS_FOR_DISCOUNT;
+  const coupon = eligibleForDiscount ? process.env.COUPON_ID : null;
 
   // At this point, associate the ID of the Customer object with your
   // own internal representation of a customer, if you have one.
   const subscription = await stripe.subscriptions.create({
     customer: customer.id,
-    items: req.body.plan_ids.map(function (planId) { return { plan: planId }; }),
+    items: planIds.map(planId => { return {plan: planId} }),
     expand: ['latest_invoice.payment_intent'],
-    coupon: coupon
+    coupon: coupon,
   });
 
   res.send(subscription);
