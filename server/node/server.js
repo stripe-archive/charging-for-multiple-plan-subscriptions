@@ -7,7 +7,7 @@ const envPath = resolve(ENV_PATH);
 const env = require('dotenv').config({ path: envPath });
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
-const minPlansForDiscount = 2;
+const MIN_PLANS_FOR_DISCOUNT = 2;
 
 app.use(express.static(process.env.STATIC_DIR));
 
@@ -46,7 +46,7 @@ app.post('/create-customer', async (req, res) => {
   // In this example, we apply the coupon if the number of plans purchased 
   // passes the threshold.
   planIds = req.body.plan_ids;
-  const eligibleForDiscount = planIds.length >= minPlansForDiscount;
+  const eligibleForDiscount = planIds.length >= MIN_PLANS_FOR_DISCOUNT;
   const coupon = eligibleForDiscount ? process.env.COUPON_ID : null;
 
   // At this point, associate the ID of the Customer object with your
