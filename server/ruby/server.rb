@@ -2,6 +2,7 @@ require 'stripe'
 require 'sinatra'
 require 'dotenv'
 require 'json'
+require 'set'
 
 Dotenv.load(File.dirname(__FILE__) + '/../../.env')
 Stripe.api_key = ENV['STRIPE_SECRET_KEY']
@@ -12,21 +13,17 @@ set :port, 4242
 
 # Number of coupons required to get a discount in this example.
 minPlansForDiscount = 2
+validPlanIds = ENV['SUBSCRIPTION_PLAN_ID'].split(',').to_set
 
 get '/' do
   content_type 'text/html'
   send_file File.join(settings.public_folder, 'index.html')
 end
 
-# This endpoint is used by client in client/script.js
-# Returns relevant data about plans using the Stripe API
 get '/bootstrap' do
   content_type 'application/json'
-  plans = JSON.parse(File.read(ENV['PLANS_FILE_LOCATION']))
-
   {
-    'publicKey': ENV['STRIPE_PUBLIC_KEY'],
-    'plans': plans
+    'publicKey': ENV['STRIPE_PUBLIC_KEY']
   }.to_json
 end
 
@@ -51,9 +48,7 @@ post '/create-customer' do
   # or currencies in one subscription. You may also want to check consistency in those
   # here
   requestedPlanIds = data['plan_ids']
-  validPlanIds = ENV['SUBSCRIPTION_PLAN_ID'].split(',')
-  validRequestedPlanIds = requestedPlanIds & validPlanIds # intersection of lists
-  if validRequestedPlanIds.length != requestedPlanIds.length
+  if !requestedPlanIds.all?{|planId| validPlanIds.include?(planId)}
     puts "⚠️  Client requested subscription with invalid Plan ID"
     status 400
     return

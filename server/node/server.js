@@ -9,6 +9,7 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const fs = require('fs');
 
 const minPlansForDiscount = 2;
+const validPlanIds = new Set(process.env.SUBSCRIPTION_PLAN_ID.split(','));
 
 app.use(express.static(process.env.STATIC_DIR));
 
@@ -30,12 +31,8 @@ app.get('/', (req, res) => {
 });
 
 app.get('/bootstrap', (req, res) => {
-  // For this example, we read metadata about plans
-  // from disk to send back to client.
-  let plans = fs.readFileSync(process.env.PLANS_FILE_LOCATION, 'utf8');
   res.send({
-    publicKey: process.env.STRIPE_PUBLIC_KEY,
-    plans: JSON.parse(plans)
+    publicKey: process.env.STRIPE_PUBLIC_KEY
   });
 });
 
@@ -56,9 +53,7 @@ app.post('/create-customer', async (req, res) => {
   // or currencies in one subscription. You may also want to check consistency in those
   // here.
   const requestedPlanIds = req.body.plan_ids;
-  console.log(requestedPlanIds);
-  const validPlanIds = process.env.SUBSCRIPTION_PLAN_ID.split(',');
-  if (!requestedPlanIds.every(val => validPlanIds.includes(val))) {
+  if (!requestedPlanIds.every(val => validPlanIds.has(val))) {
     console.log(`⚠️  Client requested subscription with invalid Plan ID.`);
     return res.sendStatus(400);
   }
