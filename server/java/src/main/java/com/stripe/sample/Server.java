@@ -65,16 +65,10 @@ public class Server {
         staticFiles.externalLocation(
                 Paths.get(Paths.get("").toAbsolutePath().toString(), dotenv.get("STATIC_DIR")).normalize().toString());
 
-        get("/bootstrap", (request, response) -> {
+        get("/public-key", (request, response) -> {
             response.type("application/json");
             JsonObject payload = new JsonObject();
             payload.addProperty("publicKey", dotenv.get("STRIPE_PUBLIC_KEY"));
-            JsonArray planIds = new JsonArray();
-            for (String planId : dotenv.get("SUBSCRIPTION_PLAN_ID").split(",")) {
-                planIds.add(new JsonPrimitive(planId));
-            }
-
-            payload.add("planIds", planIds);
             return payload.toString();
         });
 
@@ -92,7 +86,7 @@ public class Server {
 
             Customer customer = Customer.create(customerParams);
 
-            String[] allPlanIds = dotenv.get("SUBSCRIPTION_PLAN_ID").split(",");
+            String[] allPlanIds = dotenv.get("SUBSCRIPTION_PLAN_IDS").split(",");
             String premiumCouponId = dotenv.get("PREMIUM_COUPON_ID");
             String couponId = postBody.planIds.length == allPlanIds.length ? premiumCouponId : null;
 
