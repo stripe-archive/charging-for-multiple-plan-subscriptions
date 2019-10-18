@@ -76,8 +76,8 @@ function describe_api_result() {
 }
 
 # Example specific code:
-ANIMALS=("lion" "tiger" "bear" "ohmy")
-PRICES=(1000 2000 3000 5000)
+ANIMALS=("lion" "tiger" "bear" "dog" "cat" "hamster")
+PRICES=(1000 2000 3000 20000 20000 100000)
 
 # create a pricing plan (and a corresponding service product) for each animal
 for (( idx=0; idx < ${#ANIMALS[@]}; idx++ )); do
