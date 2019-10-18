@@ -89,10 +89,10 @@ function describe_api_result() {
 # Example specific code:
 ANIMALS=("lion" "tiger" "bear" "ohmy")
 
-# create a pricing plan (and a corresponding service product) for each animal
+# delete pricing plan (and corresponding service product) for each animal
 for animal in "${ANIMALS[@]}"; do
   # get pricing plan for each animal to get associated product
-  RESULT=$(get_pricing_plan ${animal})
+  RESULT=$(get_pricing_plan "${animal}")
   ERROR=$(echo "${RESULT}" | jq -e .error)
   error_check_status=$?
   if [ $error_check_status -gt 0 ]; then
@@ -109,7 +109,7 @@ for animal in "${ANIMALS[@]}"; do
   fi
 done
 
-# create a coupon
+# delete coupon
 RESULT=$(delete_coupon "STRIPE_SAMPLE_MULTI_PLAN_DISCOUNT" 20)
 describe_api_result "${RESULT}" "delete sample coupon"
 

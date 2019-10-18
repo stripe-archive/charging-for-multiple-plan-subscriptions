@@ -80,9 +80,11 @@ ANIMALS=("lion" "tiger" "bear" "ohmy")
 PRICES=(1000 2000 3000 5000)
 
 # create a pricing plan (and a corresponding service product) for each animal
-for animal in "${ANIMALS[@]}"; do
+for (( idx=0; idx < ${#ANIMALS[@]}; idx++ )); do
+  animal=${ANIMALS[$idx]}
+  price=${PRICES[$idx]}
   # create a pricing plan for each animal
-  RESULT=$(create_pricing_plan "${animal}" 1000)
+  RESULT=$(create_pricing_plan "${animal}" "${price}")
   describe_api_result "${RESULT}" "create plan for ${animal}"
 done
 
