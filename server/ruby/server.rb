@@ -22,20 +22,7 @@ end
 # Returns relevant data about plans using the Stripe API
 get '/bootstrap' do
   content_type 'application/json'
-
-  # planIds = ENV['SUBSCRIPTION_PLAN_ID'].split(',')
-  plans = JSON.parse(File.read(ENV['PLANS_SOURCE_FILE']))
-  # for id in planIds do
-  #   # See https://site-admin.stripe.com/docs/api/plans?lang=ruby for more
-  #   # about retrieving and using Plans.
-  #   plan = Stripe::Plan.retrieve(id)
-  #   plans.push({
-  #     id: plan['id'],
-  #     price: plan['amount'],
-  #     animal: plan['metadata']['animal'],
-  #     imageURL: plan['metadata']['imageURL']
-  #   })
-  # end
+  plans = JSON.parse(File.read(ENV['PLANS_FILE_LOCATION']))
 
   {
     'publicKey': ENV['STRIPE_PUBLIC_KEY'],

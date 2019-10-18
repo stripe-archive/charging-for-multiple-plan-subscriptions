@@ -32,8 +32,7 @@ app.get('/', (req, res) => {
 app.get('/bootstrap', (req, res) => {
   // For this example, we read metadata about plans
   // from disk to send back to client.
-  let plans = fs.readFileSync(process.env.PLANS_SOURCE_FILE, 'utf8');
-  console.log(plans);
+  let plans = fs.readFileSync(process.env.PLANS_FILE_LOCATION, 'utf8');
   res.send({
     publicKey: process.env.STRIPE_PUBLIC_KEY,
     plans: JSON.parse(plans)
@@ -57,6 +56,7 @@ app.post('/create-customer', async (req, res) => {
   // or currencies in one subscription. You may also want to check consistency in those
   // here.
   const requestedPlanIds = req.body.plan_ids;
+  console.log(requestedPlanIds);
   const validPlanIds = process.env.SUBSCRIPTION_PLAN_ID.split(',');
   if (!requestedPlanIds.every(val => validPlanIds.includes(val))) {
     console.log(`⚠️  Client requested subscription with invalid Plan ID.`);
@@ -72,7 +72,7 @@ app.post('/create-customer', async (req, res) => {
   // own internal representation of a customer, if you have one.
   const subscription = await stripe.subscriptions.create({
     customer: customer.id,
-    items: requestedPlanIds.map(planId => {plan: planId}),
+    items: requestedPlanIds.map(planId => { return {plan: planId} }),
     expand: ['latest_invoice.payment_intent'],
     coupon: coupon,
   });

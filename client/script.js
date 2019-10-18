@@ -99,7 +99,7 @@ function createCustomer(paymentMethod, cardholderEmail) {
     body: JSON.stringify({
       email: cardholderEmail,
       payment_method: paymentMethod,
-      plan_ids: getSelectedPlans().map(plan => plan.id)
+      plan_ids: getSelectedPlans().map(plan => plan.planId)
     })
   })
     .then(response => {
