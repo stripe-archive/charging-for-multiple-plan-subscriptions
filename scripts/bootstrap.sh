@@ -76,8 +76,7 @@ function describe_api_result() {
 }
 
 # Example specific code:
-ANIMALS=("lion" "tiger" "bear" "dog" "cat" "hamster")
-PRICES=(1000 2000 3000 20000 20000 100000)
+# ANIMALS and PRICES are located in the .env file
 
 # create a pricing plan (and a corresponding service product) for each animal
 for (( idx=0; idx < ${#ANIMALS[@]}; idx++ )); do
