@@ -22,3 +22,5 @@ target/
 .classpath
 .factorypath
 .project
+
+.*~
