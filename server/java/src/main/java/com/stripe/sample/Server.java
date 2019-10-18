@@ -27,6 +27,7 @@ import com.stripe.net.Webhook;
 import io.github.cdimascio.dotenv.Dotenv;
 
 public class Server {
+    private final static Integer MIN_PLANS_FOR_DISCOUNT = 2;
     private static Gson gson = new Gson();
 
     static class CreatePaymentBody {
@@ -83,12 +84,7 @@ public class Server {
             Map<String, String> invoiceSettings = new HashMap<String, String>();
             invoiceSettings.put("default_payment_method", postBody.getPaymentMethod());
             customerParams.put("invoice_settings", invoiceSettings);
-
             Customer customer = Customer.create(customerParams);
-
-            String[] allPlanIds = dotenv.get("SUBSCRIPTION_PLAN_IDS").split(",");
-            String premiumCouponId = dotenv.get("PREMIUM_COUPON_ID");
-            String couponId = postBody.planIds.length == allPlanIds.length ? premiumCouponId : null;
 
             // Subscribe customer to a plan
             Map<String, Object> items = new HashMap<>();
@@ -104,7 +100,13 @@ public class Server {
             params.put("customer", customer.getId());
             params.put("items", items);
             params.put("expand", expand);
-            params.put("coupon", couponId);
+
+            String couponId = dotenv.get("COUPON_ID");
+            Boolean eligibleForDiscount = postBody.planIds.length >= MIN_PLANS_FOR_DISCOUNT;
+            if (eligibleForDiscount) {
+                params.put("coupon", couponId);
+            }
+
             Subscription subscription = Subscription.create(params);
 
             return subscription.toJson();
