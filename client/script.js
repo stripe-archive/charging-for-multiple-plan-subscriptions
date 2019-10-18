@@ -161,16 +161,31 @@ function bootstrap() {
       return response.json();
     })
     .then(function(json) {
-      json.plans.forEach(function(plan) {
-        plan.selected = false;
-        allPlans[plan.planId] = plan;
-      });
-      generateHtmlForPlansPage();
       stripeElements(json.publicKey);
     });
 }
 
+function bootstrapPlans() {
+  return fetch('/plans.json', {
+    method: 'get',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  })
+    .then(function(response) {
+      return response.json();
+    })
+    .then(function(json) {
+      json.forEach(function(plan) {
+        plan.selected = false;
+        allPlans[plan.planId] = plan;
+      });
+      generateHtmlForPlansPage();
+    });
+}
+
 bootstrap();
+bootstrapPlans();
 
 function generateHtmlForPlansPage(){
   function generateHtmlForSinglePlan(id, animal, price, url){
