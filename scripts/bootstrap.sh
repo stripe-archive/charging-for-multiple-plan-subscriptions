@@ -11,6 +11,7 @@
 
 REPO_ROOT=$(cd $(dirname $0)/.. && pwd)
 DOTENV_FILE="${REPO_ROOT}/.env"
+. "${REPO_ROOT}/scripts/utilities.sh"
 
 if [ ! -f "${DOTENV_FILE}" ]; then
   echo ".env file not found at ${DOTENV_FILE}. Please follow the instructions in ${REPO_ROOT}/README.md to create one."
@@ -37,10 +38,6 @@ if ! command -v jq > /dev/null ; then
 fi
 
 ### Helper Functions
-function stripe_curl() {
-  curl --silent -u "${STRIPE_SECRET_KEY}:" "$@"
-}
-
 function create_pricing_plan() {
   local NAME=$1
   local PRICE=$2
@@ -62,26 +59,16 @@ function create_coupon() {
   return $?
 }
 
-function describe_api_result() {
-  local RESULT="$1"
-  local ACTION="$2"
-  ERROR=$(echo "${RESULT}" | jq -e .error)
-  error_check_status=$?
-  if [ $error_check_status -eq 0 ]; then
-    echo "Error performing action: \"${ACTION}\""
-    echo "${ERROR}" | jq .message
-  else
-    echo "Performed action \"${ACTION}\" successfully with id=$(echo "${RESULT}" | jq .id)"
-  fi
-}
-
 # Example specific code:
 # ANIMALS and PRICES are located in the .env file
+IFS=',' read -r -a ANIMAL_LIST <<< "${ANIMALS}"
+IFS=',' read -r -a PRICE_LIST <<< "${PRICES}"
+unset IFS
 
 # create a pricing plan (and a corresponding service product) for each animal
-for (( idx=0; idx < ${#ANIMALS[@]}; idx++ )); do
-  animal=${ANIMALS[$idx]}
-  price=${PRICES[$idx]}
+for (( idx=0; idx < ${#ANIMAL_LIST[@]}; idx++ )); do
+  animal=${ANIMAL_LIST[$idx]}
+  price=${PRICE_LIST[$idx]}
   # create a pricing plan for each animal
   RESULT=$(create_pricing_plan "${animal}" "${price}")
   describe_api_result "${RESULT}" "create plan for ${animal}"
@@ -90,6 +77,5 @@ done
 # create a coupon
 RESULT=$(create_coupon "STRIPE_SAMPLE_MULTI_PLAN_DISCOUNT" 20)
 describe_api_result "${RESULT}" "Create coupon for bulk discount"
-
 
 

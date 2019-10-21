@@ -11,6 +11,8 @@
 
 REPO_ROOT=$(cd $(dirname $0)/.. && pwd)
 DOTENV_FILE="${REPO_ROOT}/.env"
+. "${REPO_ROOT}/scripts/utilities.sh"
+
 
 if [ ! -f "${DOTENV_FILE}" ]; then
   echo ".env file not found at ${DOTENV_FILE}. Please follow the instructions in ${REPO_ROOT}/README.md to create one."
@@ -37,10 +39,6 @@ if ! command -v jq > /dev/null ; then
 fi
 
 ### Helper Functions
-function stripe_curl() {
-  curl --silent -u "${STRIPE_SECRET_KEY}:" "$@"
-}
-
 function get_plan_id() {
   local PLAN_NAME=$1
   echo "stripe-example-${PLAN_NAME}"
@@ -73,24 +71,13 @@ function delete_coupon() {
   stripe_curl -X DELETE "https://api.stripe.com/v1/coupons/${COUPON_ID}"
 }
 
-function describe_api_result() {
-  local RESULT="$1"
-  local ACTION="$2"
-  ERROR=$(echo "${RESULT}" | jq -e .error)
-  error_check_status=$?
-  if [ $error_check_status -eq 0 ]; then
-    echo "Error performing action: \"${ACTION}\""
-    echo "${ERROR}" | jq .message
-  else
-    echo "Performed action \"${ACTION}\" successfully with id=$(echo "${RESULT}" | jq .id)"
-  fi
-}
-
 # Example specific code:
 # ANIMALS comes from the .env file
 
 # delete pricing plan (and corresponding service product) for each animal
-for animal in "${ANIMALS[@]}"; do
+IFS=',' read -r -a ANIMAL_LIST <<< "${ANIMALS}"
+debug ANIMAL_LIST
+for animal in "${ANIMAL_LIST[@]}"; do
   # get pricing plan for each animal to get associated product
   RESULT=$(get_pricing_plan "${animal}")
   ERROR=$(echo "${RESULT}" | jq -e .error)
@@ -105,7 +92,7 @@ for animal in "${ANIMALS[@]}"; do
     RESULT=$(delete_product ${PRODUCT_ID})
     describe_api_result "${RESULT}" "delete product for ${animal}"
   else
-    echo "Plan for ${animal} does not exist, skipping."
+    warn "Plan for ${animal} does not exist, skipping."
   fi
 done
 

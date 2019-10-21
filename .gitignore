@@ -1,6 +1,8 @@
 .env
 .DS_Store
 .vscode
+server.log
+server.pid
 
 # Node files
 node_modules/
