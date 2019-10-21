@@ -14,6 +14,16 @@ python3 -m venv /path/to/new/virtual/environment
 source /path/to/new/virtual/environment/venv/bin/activate
 ```
 
+**TIP**: create the virtualenv in it's own directory, to keep it's contents separate from the rest of your code. 
+A common convention is to create it locally in your project, but hidden and excluded in .gitignore. 
+
+Ex: ```server/python/.virtualenv```
+
+A number of tools use the convention of storing named virtualenvs in a subdirectory of the user's home dir. 
+
+Ex: ```$HOME/.virtualenvs/stripe-samples```
+
+
 2. Install dependencies
 
 ```
