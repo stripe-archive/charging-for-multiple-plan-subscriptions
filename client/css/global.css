@@ -341,6 +341,18 @@ pre {
   margin: 5px;
 }
 
+#summary-table {
+  width: 400px;
+}
+
+.summary-price {
+  text-align:right;
+}
+
+.summary-calculation .summary-title {
+  text-align:right;
+}
+
 /* Responsiveness */
 @media (max-width: 720px) {
   .sr-root {
