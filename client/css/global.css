@@ -370,14 +370,40 @@ pre {
 }
 
 #summary-table {
-  width: 400px;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 70% 30%;
+}
+
+.summary-title {
+  font-size: 1.5vw;
+  vertical-align: middle;
 }
 
 .summary-price {
+  font-size: 1.5vw;
+  vertical-align: middle;
   text-align:right;
 }
 
-.summary-calculation .summary-title {
+.summary-subtotal {
+  margin-top: 20px;
+}
+
+.summary-total {
+  margin-top: 20px;
+  font-weight: bold;
+}
+
+.summary-subtotal.summary-title {
+  text-align:right;
+}
+
+.summary-discount.summary-title {
+  text-align:right;
+}
+
+.summary-total.summary-title {
   text-align:right;
 }
 

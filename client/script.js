@@ -93,16 +93,16 @@ var updateSummaryTable = function() {
   var total = subtotal - discount;
 
   var displayPriceDollarsPerMonth = function(price) {
-    return '$' + Math.round(price / 100.0) + '/month';
+    return '$' + Math.round(price / 100.0) + '/mo';
   };
 
   var orderSummary = document.getElementById('summary-table');
   if (orderSummary) {
     var buildOrderSummaryRow = function(rowClass, desc, amountCents) {
-        return `<tr class="${rowClass}">
-          <td class="summary-title">${desc}</td>
-          <td class="summary-price">${displayPriceDollarsPerMonth(amountCents)}</td>
-        </tr>`;
+        return `
+          <div class="summary-title ${rowClass}">${desc}</div>
+          <div class="summary-price ${rowClass}">${displayPriceDollarsPerMonth(amountCents)}</div>
+        `;
     };
     orderSummary.innerHTML = '';
     if (selectedPlans.length == 0) {
@@ -111,9 +111,9 @@ var updateSummaryTable = function() {
       for (var i = 0; i < selectedPlans.length; i++) {
         orderSummary.innerHTML += buildOrderSummaryRow('summary-product', selectedPlans[i].title, selectedPlans[i].price);
       }
-      orderSummary.innerHTML += buildOrderSummaryRow('summary-calculation', 'Subtotal', subtotal);
-      orderSummary.innerHTML += buildOrderSummaryRow('summary-calculation', 'Discount', discount);
-      orderSummary.innerHTML += buildOrderSummaryRow('summary-calculation', 'Total', total);
+      orderSummary.innerHTML += buildOrderSummaryRow('summary-subtotal', 'Subtotal', subtotal);
+      orderSummary.innerHTML += buildOrderSummaryRow('summary-discount', 'Discount', discount);
+      orderSummary.innerHTML += buildOrderSummaryRow('summary-total', 'Total', total);
     }
   }
 };
