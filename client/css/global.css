@@ -392,9 +392,18 @@ pre {
 
 .summary-total {
   margin-top: 20px;
+  font-weight: bold;
 }
 
-.summary-calculation.summary-title {
+.summary-subtotal.summary-title {
+  text-align:right;
+}
+
+.summary-discount.summary-title {
+  text-align:right;
+}
+
+.summary-total.summary-title {
   text-align:right;
 }
 

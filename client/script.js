@@ -111,9 +111,9 @@ var updateSummaryTable = function() {
       for (var i = 0; i < selectedPlans.length; i++) {
         orderSummary.innerHTML += buildOrderSummaryRow('summary-product', selectedPlans[i].title, selectedPlans[i].price);
       }
-      orderSummary.innerHTML += buildOrderSummaryRow('summary-calculation summary-subtotal', 'Subtotal', subtotal);
-      orderSummary.innerHTML += buildOrderSummaryRow('summary-calculation summary-discount', 'Discount', discount);
-      orderSummary.innerHTML += buildOrderSummaryRow('summary-calculation summary-total', 'Total', total);
+      orderSummary.innerHTML += buildOrderSummaryRow('summary-subtotal', 'Subtotal', subtotal);
+      orderSummary.innerHTML += buildOrderSummaryRow('summary-discount', 'Discount', discount);
+      orderSummary.innerHTML += buildOrderSummaryRow('summary-total', 'Total', total);
     }
   }
 };
