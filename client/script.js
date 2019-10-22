@@ -102,11 +102,13 @@ function createCustomer(paymentMethod, cardholderEmail) {
       plan_ids: getSelectedPlans().map(plan => plan.planId)
     })
   })
-    .then(response => {
-      return response.json();
-    })
-    .then(subscription => {
-      handleSubscription(subscription);
+    .then(function(response) {
+      if (response.status != 200) {
+        orderFailed(response);
+      } else {
+        var subscription = response.json();
+        handleSubscription(subscription);
+      }
     });
 }
 
@@ -238,4 +240,15 @@ var orderComplete = function(subscription) {
   });
   document.querySelector('.order-status').textContent = subscription.status;
   document.querySelector('pre').textContent = subscriptionJson;
+};
+
+var orderFailed = function(error) {
+  document.querySelectorAll('.payment-view').forEach(function(view) {
+    view.classList.add('hidden');
+  });
+  document.querySelectorAll('.completed-view').forEach(function(view) {
+    view.classList.remove('hidden');
+  });
+  document.querySelector('.order-status').textContent = 'incomplete';
+  document.querySelector('pre').textContent = `error: request failed with status ${error.status}`;
 };

@@ -33,32 +33,37 @@ app.get('/public-key', (req, res) => {
 });
 
 app.post('/create-customer', async (req, res) => {
-  // This creates a new Customer and attaches
-  // the PaymentMethod to be default for invoice in one API call.
-  const customer = await stripe.customers.create({
-    payment_method: req.body.payment_method,
-    email: req.body.email,
-    invoice_settings: {
-      default_payment_method: req.body.payment_method
-    }
-  });
+  try {
+    // This creates a new Customer and attaches
+    // the PaymentMethod to be default for invoice in one API call.
+    const customer = await stripe.customers.create({
+      payment_method: req.body.payment_method,
+      email: req.body.email,
+      invoice_settings: {
+        default_payment_method: req.body.payment_method
+      }
+    });
 
-  // In this example, we apply the coupon if the number of plans purchased 
-  // meets or exceeds the threshold.
-  planIds = req.body.plan_ids;
-  const eligibleForDiscount = planIds.length >= MIN_PLANS_FOR_DISCOUNT;
-  const coupon = eligibleForDiscount ? process.env.COUPON_ID : null;
+    // In this example, we apply the coupon if the number of plans purchased
+    // meets or exceeds the threshold.
+    planIds = req.body.plan_ids;
+    const eligibleForDiscount = planIds.length >= MIN_PLANS_FOR_DISCOUNT;
+    const coupon = eligibleForDiscount ? process.env.COUPON_ID : null;
 
-  // At this point, associate the ID of the Customer object with your
-  // own internal representation of a customer, if you have one.
-  const subscription = await stripe.subscriptions.create({
-    customer: customer.id,
-    items: planIds.map(planId => { return {plan: planId} }),
-    expand: ['latest_invoice.payment_intent'],
-    coupon: coupon,
-  });
+    // At this point, associate the ID of the Customer object with your
+    // own internal representation of a customer, if you have one.
+    const subscription = await stripe.subscriptions.create({
+      customer: customer.id,
+      items: planIds.map(planId => { return {plan: planId} }),
+      expand: ['latest_invoice.payment_intent'],
+      coupon: coupon,
+    });
 
-  res.send(subscription);
+    res.send(subscription);
+  } catch (err) {
+    console.log(`⚠️  Failed to create subscription.`);
+    res.sendStatus(400);
+  }
 });
 
 app.post('/subscription', async (req, res) => {
