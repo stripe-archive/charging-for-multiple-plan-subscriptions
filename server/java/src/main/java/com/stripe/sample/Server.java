@@ -1,5 +1,6 @@
 package com.stripe.sample;
 
+import static spark.Spark.exception;
 import static spark.Spark.get;
 import static spark.Spark.port;
 import static spark.Spark.post;
@@ -65,6 +66,11 @@ public class Server {
 
         staticFiles.externalLocation(
                 Paths.get(Paths.get("").toAbsolutePath().toString(), dotenv.get("STATIC_DIR")).normalize().toString());
+
+        exception(Exception.class, (exception, request, response) -> {
+            response.type("application/json");
+            response.body(String.format("{\"error\":{\"message\":\"%s\"}}", exception.getMessage()));
+        });
 
         get("/public-key", (request, response) -> {
             response.type("application/json");

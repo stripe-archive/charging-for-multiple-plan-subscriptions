@@ -11,6 +11,7 @@ Stripe.api_key = ENV['STRIPE_SECRET_KEY']
 set :static, true
 set :public_folder, File.join(File.dirname(__FILE__), ENV['STATIC_DIR'])
 set :port, 4242
+set :show_exceptions, :after_handler
 
 # Number of coupons required to get a discount in this example.
 MIN_PLANS_FOR_DISCOUNT = 2
@@ -68,6 +69,15 @@ post '/subscription' do
   subscription = Stripe::Subscription.retrieve(data['subscriptionId'])
 
   subscription.to_json
+end
+
+error 400..500 do
+  status 500
+  {
+    'error': {
+      'message': env['sinatra.error'].message
+    }
+  }.to_json
 end
 
 post '/webhook' do

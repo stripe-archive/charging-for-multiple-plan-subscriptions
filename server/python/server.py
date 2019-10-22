@@ -40,50 +40,43 @@ def get_public_key():
 
 @app.route('/create-customer', methods=['POST'])
 def create_customer():
-    try:
-        # Reads application/json and returns a response
-        data = json.loads(request.data)
-        paymentMethod = data['payment_method']
-        planIds = data['plan_ids']
+    # Reads application/json and returns a response
+    data = json.loads(request.data)
+    paymentMethod = data['payment_method']
+    planIds = data['plan_ids']
 
-        # This creates a new Customer and attaches the PaymentMethod in one API call.
-        # At this point, associate the ID of the Customer object with your
-        # own internal representation of a customer, if you have one.
-        customer = stripe.Customer.create(
-            payment_method=paymentMethod,
-            email=data['email'],
-            invoice_settings={
-                'default_payment_method': paymentMethod
-            }
-        )
+    # This creates a new Customer and attaches the PaymentMethod in one API call.
+    # At this point, associate the ID of the Customer object with your
+    # own internal representation of a customer, if you have one.
+    customer = stripe.Customer.create(
+        payment_method=paymentMethod,
+        email=data['email'],
+        invoice_settings={
+            'default_payment_method': paymentMethod
+        }
+    )
 
-        # In this example, we apply the coupon if the number of plans purchased
-        # meets or exceeds the threshold.
-        eligibleForDiscount = len(planIds) >= MIN_PLANS_FOR_DISCOUNT
-        coupon = os.getenv('COUPON_ID') if eligibleForDiscount else None
+    # In this example, we apply the coupon if the number of plans purchased
+    # meets or exceeds the threshold.
+    eligibleForDiscount = len(planIds) >= MIN_PLANS_FOR_DISCOUNT
+    coupon = os.getenv('COUPON_ID') if eligibleForDiscount else None
 
-        # Subscribe the user to the subscription created
-        subscription = stripe.Subscription.create(
-            customer=customer.id,
-            items=[{"plan": planId} for planId in planIds],
-            expand=["latest_invoice.payment_intent"],
-            coupon=coupon
-        )
-        return jsonify(subscription)
-    except Exception as e:
-        return jsonify(e), 403
+    # Subscribe the user to the subscription created
+    subscription = stripe.Subscription.create(
+        customer=customer.id,
+        items=[{"plan": planId} for planId in planIds],
+        expand=["latest_invoice.payment_intent"],
+        coupon=coupon
+    )
+    return jsonify(subscription)
 
 
 @app.route('/subscription', methods=['POST'])
 def getSubscription():
     # Reads application/json and returns a response
     data = json.loads(request.data)
-    try:
-        subscription = stripe.Subscription.retrieve(data['subscriptionId'])
-        return jsonify(subscription)
-    except Exception as e:
-        return jsonify(e), 403
-
+    subscription = stripe.Subscription.retrieve(data['subscriptionId'])
+    return jsonify(subscription)
 
 @app.route('/webhook', methods=['POST'])
 def webhook_received():
@@ -135,6 +128,15 @@ def webhook_received():
 
     return jsonify({'status': 'success'})
 
+@app.errorhandler(Exception)
+def wrap_error(e):
+    # try to return error message from the Stripe API first, otherwise fall back to repr
+    if (hasattr(e, 'json_body')
+        and 'error' in e.json_body
+        and 'message' in e.json_body['error']):
+        return jsonify({ 'error': { 'message': e.json_body['error']['message'] } }), 500
+
+    return jsonify({ 'error': { 'message': repr(e) }})
 
 if __name__ == '__main__':
     app.run(port=4242)

@@ -24,9 +24,26 @@ $container['logger'] = function ($c) {
   return $logger;
 };
 
+$container['errorHandler'] = function ($c) {
+  return function ($request, $response, $exception) use ($c) {
+    // try to return error message from Stripe API first, otherwise fall back to the full error
+    if (property_exists($exception, 'jsonBody')
+      && isset($exception->jsonBody['error'])
+      && isset($exception->jsonBody['error']['message'])) {
+        return $response->withStatus(500)
+          ->withHeader('Content-Type', 'application/json')
+          ->withJson([ 'error' => [ 'message' => $exception->jsonBody['error']['message'] ]]);
+    }
+
+    return $response->withStatus(500)
+      ->withHeader('Content-Type', 'application/json')
+      ->withJson([ 'error' => [ 'message' => strval($exception) ]]);
+  };
+};
+
 $app->add(function ($request, $response, $next) {
-    Stripe::setApiKey(getenv('STRIPE_SECRET_KEY'));
-    return $next($request, $response);
+  Stripe::setApiKey(getenv('STRIPE_SECRET_KEY'));
+  return $next($request, $response);
 });
 
 $app->get('/', function (Request $request, Response $response, array $args) {   
@@ -79,62 +96,62 @@ $app->post('/subscription', function (Request $request, Response $response, arra
 
 
 $app->post('/webhook', function(Request $request, Response $response) {
-    $logger = $this->get('logger');
+  $logger = $this->get('logger');
+  $event = $request->getParsedBody();
+  // Parse the message body (and check the signature if possible)
+  $webhookSecret = getenv('STRIPE_WEBHOOK_SECRET');
+  if ($webhookSecret) {
+    try {
+      $event = \Stripe\Webhook::constructEvent(
+        $request->getBody(),
+        $request->getHeaderLine('stripe-signature'),
+        $webhookSecret
+      );
+    } catch (\Exception $e) {
+      return $response->withJson([ 'error' => $e->getMessage() ])->withStatus(403);
+    }
+  } else {
     $event = $request->getParsedBody();
-    // Parse the message body (and check the signature if possible)
-    $webhookSecret = getenv('STRIPE_WEBHOOK_SECRET');
-    if ($webhookSecret) {
-      try {
-        $event = \Stripe\Webhook::constructEvent(
-          $request->getBody(),
-          $request->getHeaderLine('stripe-signature'),
-          $webhookSecret
-        );
-      } catch (\Exception $e) {
-        return $response->withJson([ 'error' => $e->getMessage() ])->withStatus(403);
-      }
-    } else {
-      $event = $request->getParsedBody();
-    }
-    $type = $event['type'];
-    $object = $event['data']['object'];
+  }
+  $type = $event['type'];
+  $object = $event['data']['object'];
 
-    // Handle the event
-    // Review important events for Billing webhooks
-    // https://stripe.com/docs/billing/webhooks
-    // Remove comment to see the various objects sent for this sample
-    switch ($type) {
-      case 'customer.created':
-        $logger->info('🔔  Webhook received! ' . $object);
-        break;
-      case 'customer.updated':
-        $logger->info('🔔  Webhook received! ' . $object);
-        break;
-      case 'invoice.upcoming':
-        $logger->info('🔔  Webhook received! ' . $object);
-        break;
-      case 'invoice.created':
-        $logger->info('🔔  Webhook received! ' . $object);
-        break;
-      case 'invoice.finalized':
-        $logger->info('🔔  Webhook received! ' . $object);
-        break;
-      case 'invoice.payment_succeeded':
-        $logger->info('🔔  Webhook received! ' . $object);
-        break;
-      case 'invoice.payment_failed':
-        $logger->info('🔔  Webhook received! ' . $object);
-        break;
-      case 'customer.subscription.created':
-        $logger->info('🔔  Webhook received! ' . $object);
-        break;
-      // ... handle other event types
-      default:
-        // Unexpected event type
-        return $response->withStatus(400);
-    }
+  // Handle the event
+  // Review important events for Billing webhooks
+  // https://stripe.com/docs/billing/webhooks
+  // Remove comment to see the various objects sent for this sample
+  switch ($type) {
+    case 'customer.created':
+      $logger->info('🔔  Webhook received! ' . $object);
+      break;
+    case 'customer.updated':
+      $logger->info('🔔  Webhook received! ' . $object);
+      break;
+    case 'invoice.upcoming':
+      $logger->info('🔔  Webhook received! ' . $object);
+      break;
+    case 'invoice.created':
+      $logger->info('🔔  Webhook received! ' . $object);
+      break;
+    case 'invoice.finalized':
+      $logger->info('🔔  Webhook received! ' . $object);
+      break;
+    case 'invoice.payment_succeeded':
+      $logger->info('🔔  Webhook received! ' . $object);
+      break;
+    case 'invoice.payment_failed':
+      $logger->info('🔔  Webhook received! ' . $object);
+      break;
+    case 'customer.subscription.created':
+      $logger->info('🔔  Webhook received! ' . $object);
+      break;
+    // ... handle other event types
+    default:
+      // Unexpected event type
+      return $response->withStatus(400);
+  }
 
-    return $response->withJson([ 'status' => 'success' ])->withStatus(200);
+  return $response->withJson([ 'status' => 'success' ])->withStatus(200);
 });
 
 $app->run();

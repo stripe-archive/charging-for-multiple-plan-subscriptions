@@ -106,7 +106,7 @@ var updateSummaryTable = function() {
     };
     orderSummary.innerHTML = '';
     if (selectedPlans.length == 0) {
-      orderSummary.innerHTML = 'No products selected.';
+      orderSummary.innerHTML = 'No products selected';
     } else {
       for (var i = 0; i < selectedPlans.length; i++) {
         orderSummary.innerHTML += buildOrderSummaryRow('summary-product', selectedPlans[i].title, selectedPlans[i].price);
@@ -221,9 +221,8 @@ getPlans();
 function generateHtmlForPlansPage(){
   function generateHtmlForSinglePlan(id, animal, price, emoji){
     result = `
-      <div>
         <div class="sr-animal">
-          <div class="product"
+          <div class="sr-animal-emoji"
             id=\'${id}\'
             onclick="toggleAnimal(\'${id}\')">
               ${emoji}
@@ -231,7 +230,6 @@ function generateHtmlForPlansPage(){
           <div class="sr-animal-text">${animal}</div>
           <div class="sr-animal-text">$${price / 100}</div>
         </div>
-      </div>
       `;
     return result;
   }
@@ -240,7 +238,7 @@ function generateHtmlForPlansPage(){
     html += generateHtmlForSinglePlan(plan.planId, plan.title, plan.price, plan.emoji);
   });
 
-  document.getElementById('product-selection').innerHTML += html;
+  document.getElementById('sr-animals').innerHTML += html;
 }
 
 function toggleAnimal(id){
