@@ -71,20 +71,35 @@ var getSelectedPlans = function() {
   return Object.values(allPlans).filter(plan => plan.selected);
 };
 
-var computeSubtotal = function() {
+var onSelectionChanged = function() {
   var selectedPlans = getSelectedPlans();
-  return selectedPlans
-    .map(plan => plan.price)
-    .reduce((plan1, plan2) => plan1 + plan2, 0);
-};
-
-var computeDiscountPercent = function() {
-  var selectedPlans = getSelectedPlans();
-  var eligibleForDiscount = selectedPlans.length >= minPlansForDiscount;
-  return eligibleForDiscount ? discountFactor : 0;
+  updateSummaryTable();
+  var showPaymentForm = selectedPlans.length == 0;
+  var paymentFormElts = document.querySelectorAll('.sr-payment-form');
+  if (showPaymentForm) {
+    paymentFormElts.forEach(function(elt) {
+      elt.classList.add('hidden');
+    });
+  } else {
+    paymentFormElts.forEach(function(elt) {
+      elt.classList.remove('hidden');
+    });
+  }
 };
 
 var updateSummaryTable = function() {
+  var computeSubtotal = function() {
+    var selectedPlans = getSelectedPlans();
+    return selectedPlans
+      .map(plan => plan.price)
+      .reduce((plan1, plan2) => plan1 + plan2, 0);
+  };
+
+  var computeDiscountPercent = function() {
+    var selectedPlans = getSelectedPlans();
+    var eligibleForDiscount = selectedPlans.length >= minPlansForDiscount;
+    return eligibleForDiscount ? discountFactor : 0;
+  };
   
   var selectedPlans = getSelectedPlans();
   var discountPercent = computeDiscountPercent(); 
@@ -209,7 +224,7 @@ function getPlans() {
         allPlans[plan.planId] = plan;
       });
       generateHtmlForPlansPage();
-      updateSummaryTable();
+      onSelectionChanged();
     });
 }
 
@@ -226,7 +241,7 @@ function generateHtmlForPlansPage(){
               ${emoji}
           </div>
           <div class="sr-animal-text">${animal}</div>
-          <div class="sr-animal-text">$${price / 100}</div>
+          <div class="sr-animal-text">$${price / 100}/mo</div>
         </div>
       `;
     return result;
@@ -249,7 +264,7 @@ function toggleAnimal(id){
     productElt.classList.remove('selected');
   }
 
-  updateSummaryTable();
+  onSelectionChanged();
 }
 
 /* ------- Post-payment helpers ------- */
