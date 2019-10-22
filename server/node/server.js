@@ -8,7 +8,6 @@ const env = require('dotenv').config({ path: envPath });
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 const MIN_PLANS_FOR_DISCOUNT = 2;
-
 app.use(express.static(process.env.STATIC_DIR));
 
 app.use(
@@ -23,6 +22,12 @@ app.use(
   })
 );
 
+const asyncMiddleware = fn =>
+  (req, res, next) => {
+    Promise.resolve(fn(req, res, next))
+      .catch(next);
+  };
+
 app.get('/', (req, res) => {
   const path = resolve(process.env.STATIC_DIR + '/index.html');
   res.sendFile(path);
@@ -32,7 +37,7 @@ app.get('/public-key', (req, res) => {
   res.send({ publicKey: process.env.STRIPE_PUBLIC_KEY });
 });
 
-app.post('/create-customer', async (req, res) => {
+app.post('/create-customer', asyncMiddleware(async (req, res, next) => {
   // This creates a new Customer and attaches
   // the PaymentMethod to be default for invoice in one API call.
   const customer = await stripe.customers.create({
@@ -59,14 +64,14 @@ app.post('/create-customer', async (req, res) => {
   });
 
   res.send(subscription);
-});
+}));
 
-app.post('/subscription', async (req, res) => {
+app.post('/subscription', asyncMiddleware(async (req, res) => {
   let subscription = await stripe.subscriptions.retrieve(
     req.body.subscriptionId
   );
   res.send(subscription);
-});
+}));
 
 // Webhook handler for asynchronous events.
 app.post('/webhook', async (req, res) => {
@@ -135,5 +140,11 @@ app.post('/webhook', async (req, res) => {
 
   res.sendStatus(200);
 });
+
+function errorHandler (err, req, res, next) {
+  res.status(500).send({ error: { message: err.message } });
+};
+
+app.use(errorHandler);
 
 app.listen(4242, () => console.log(`Node server listening on port ${4242}!`));
