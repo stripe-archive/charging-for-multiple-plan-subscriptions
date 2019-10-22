@@ -1,38 +1,87 @@
+
 [
     {
-        "planId": "stripeDemo_lion_plan",
-        "price": 1000,
-        "title": "lion",
-        "emoji": "🦁"
-    },
-    {
-        "planId": "stripeDemo_tiger_plan",
-        "price": 2000,
-        "title": "tiger",
-        "emoji": "🐯"
-    },
-    {
         "planId": "stripeDemo_bear_plan",
-        "price": 3000,
+        "price": 80000,
         "title": "bear",
         "emoji": "🐻"
     },
     {
-        "planId": "stripeDemo_dog_plan",
+        "planId": "stripeDemo_koala_plan",
+        "price": 30000,
+        "title": "koala",
+        "emoji": "🐨"
+    },
+    {
+        "planId": "stripeDemo_panda_plan",
+        "price": 60000,
+        "title": "panda",
+        "emoji": "🐼"
+    },
+    {
+        "planId": "stripeDemo_butterfly_plan",
+        "price": 1000,
+        "title": "butterfly",
+        "emoji": "🦋"
+    },
+    {
+        "planId": "stripeDemo_monkey_plan",
         "price": 20000,
+        "title": "monkey",
+        "emoji": "🐵"
+    },
+    {
+        "planId": "stripeDemo_dog_plan",
+        "price": 10000,
         "title": "dog",
         "emoji": "🐶"
     },
     {
         "planId": "stripeDemo_cat_plan",
-        "price": 30000,
-        "title": "dog",
+        "price": 15000,
+        "title": "cat",
         "emoji": "🐱"
     },
     {
-        "planId": "stripeDemo_hamster_plan",
-        "price": 100000,
-        "title": "hamster",
-        "emoji": "🐹"
+        "planId": "stripeDemo_tiger_plan",
+        "price": 65000,
+        "title": "tiger",
+        "emoji": "🐯"
+    },
+    {
+        "planId": "stripeDemo_horse_plan",
+        "price": 55000,
+        "title": "horse",
+        "emoji": "🐴"
+    },
+    {
+        "planId": "stripeDemo_cow_plan",
+        "price": 43000,
+        "title": "cow",
+        "emoji": "🐮"
+    },
+    {
+        "planId": "stripeDemo_pig_plan",
+        "price": 38000,
+        "title": "pig",
+        "emoji": "🐷"
+    },
+    {
+        "planId": "stripeDemo_mouse_plan",
+        "price": 1000,
+        "title": "mouse",
+        "emoji": "🐭"
+    },
+    {
+        "planId": "stripeDemo_rabbit_plan",
+        "price": 5000,
+        "title": "rabbit",
+        "emoji": "🐰"
+    },
+    {
+        "planId": "stripeDemo_dragon_plan",
+        "price": 10000000,
+        "title": "dragon",
+        "emoji": "🐲"
     }
 ]
