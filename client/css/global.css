@@ -372,6 +372,8 @@ pre {
 #summary-table {
   width: 100%;
   display: grid;
+  margin-top: 10px;
+  margin-bottom: 10px;
   grid-template-columns: 70% 30%;
 }
 
