@@ -1,7 +1,7 @@
 var stripe;
 var allPlans = {};
 var minPlansForDiscount = 2;
-var discountFactor = .8;
+var discountFactor = 0.2;
 
 var stripeElements = function(publicKey) {
   stripe = Stripe(publicKey);
@@ -67,28 +67,56 @@ var pay = function(stripe, card) {
     });
 };
 
-var computePrice = function() {
-  var selectedPlans = getSelectedPlans();
-  var total = selectedPlans
-    .map(plan => plan.price)
-    .reduce((plan1, plan2) => plan1 + plan2, 0);
-  var eligibleForDiscount = selectedPlans.length >= minPlansForDiscount;
-  if (eligibleForDiscount) {
-    total *= discountFactor;
-  }
-
-  // price from server is in cents
-  return total / 100;
-}
-
-var updatePrice = function() {
-  var price = computePrice();
-  document.getElementById('total-amount').innerHTML = `\$${price}`;
-}
-
 var getSelectedPlans = function() {
   return Object.values(allPlans).filter(plan => plan.selected);
-}
+};
+
+var computeSubtotal = function() {
+  var selectedPlans = getSelectedPlans();
+  return selectedPlans
+    .map(plan => plan.price)
+    .reduce((plan1, plan2) => plan1 + plan2, 0);
+};
+
+var computeDiscountPercent = function() {
+  var selectedPlans = getSelectedPlans();
+  var eligibleForDiscount = selectedPlans.length >= minPlansForDiscount;
+  return eligibleForDiscount ? discountFactor : 0;
+};
+
+var updateSummaryTable = function() {
+  
+  var selectedPlans = getSelectedPlans();
+  var discountPercent = computeDiscountPercent(); 
+  var subtotal = computeSubtotal(); 
+  var discount = discountPercent * subtotal;
+  var total = subtotal - discount;
+
+  var displayPriceDollarsPerMonth = function(price) {
+    return '$' + Math.round(price / 100.0) + '/month';
+  };
+
+  var orderSummary = document.getElementById('summary-table');
+  if (orderSummary) {
+    var buildOrderSummaryRow = function(rowClass, desc, amountCents) {
+        return `<tr class="${rowClass}">
+          <td class="summary-title">${desc}</td>
+          <td class="summary-price">${displayPriceDollarsPerMonth(amountCents)}</td>
+        </tr>`;
+    };
+    orderSummary.innerHTML = '';
+    if (selectedPlans.length == 0) {
+      orderSummary.innerHTML = 'No products selected.';
+    } else {
+      for (var i = 0; i < selectedPlans.length; i++) {
+        orderSummary.innerHTML += buildOrderSummaryRow('summary-product', selectedPlans[i].title, selectedPlans[i].price);
+      }
+      orderSummary.innerHTML += buildOrderSummaryRow('summary-calculation', 'Subtotal', subtotal);
+      orderSummary.innerHTML += buildOrderSummaryRow('summary-calculation', 'Discount', discount);
+      orderSummary.innerHTML += buildOrderSummaryRow('summary-calculation', 'Total', total);
+    }
+  }
+};
 
 function createCustomer(paymentMethod, cardholderEmail) {
   return fetch('/create-customer', {
@@ -183,6 +211,7 @@ function getPlans() {
         allPlans[plan.planId] = plan;
       });
       generateHtmlForPlansPage();
+      updateSummaryTable();
     });
 }
 
@@ -224,7 +253,7 @@ function toggleAnimal(id){
     productElt.classList.remove('selected');
   }
 
-  updatePrice();
+  updateSummaryTable();
 }
 
 /* ------- Post-payment helpers ------- */
