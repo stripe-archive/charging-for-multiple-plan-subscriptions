@@ -29,17 +29,6 @@ if [ -z "${STRIPE_SECRET_KEY}" ]; then
   exit 1
 fi
 
-### ensure curl and jq are installed
-if ! command -v curl > /dev/null ; then
-  error "curl is required."
-  exit 1
-fi
-
-if ! command -v jq > /dev/null ; then
-  error "jq is required."
-  exit 1
-fi
-
 ### Helper Functions
 function create_payment_method() {
   stripe_curl https://api.stripe.com/v1/payment_methods \

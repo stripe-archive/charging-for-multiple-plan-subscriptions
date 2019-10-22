@@ -30,6 +30,19 @@ function error() {
   echo -e "${RED}[ERROR]${NC} $(ts) $@"
 }
 
+# Dependencies
+### ensure curl and jq are installed
+if ! command -v curl > /dev/null ; then
+  error "curl is required."
+  exit 1
+fi
+
+if ! command -v jq > /dev/null ; then
+  error "jq is required."
+  exit 1
+fi
+
+
 # STRIPE API UTILS
 function stripe_curl() {
   curl --silent -u "${STRIPE_SECRET_KEY}:" "$@"
@@ -109,7 +122,3 @@ function stop_process() {
   return 0
 }
 
-function string_to_list() {
-  local str="$1"
-  echo "$1" | sed "s/,/ /g"
-}

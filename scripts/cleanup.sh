@@ -27,17 +27,6 @@ if [ -z "${STRIPE_SECRET_KEY}" ]; then
   exit 1
 fi
 
-### ensure curl and jq are installed
-if ! command -v curl > /dev/null ; then
-  echo "curl is required."
-  exit 1
-fi
-
-if ! command -v jq > /dev/null ; then
-  echo "jq is required."
-  exit 1
-fi
-
 ### Helper Functions
 function get_plan_id() {
   local PLAN_NAME=$1
