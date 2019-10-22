@@ -327,7 +327,7 @@ pre {
 }
 
 .sr-animal-emoji {
-  font-size:15vw;
+  font-size:10vw;
   margin:0px;
   opacity: .5;
 }
@@ -336,16 +336,20 @@ pre {
   opacity: 1;
 }
 
-.sr-animals {
-  display: grid;
+.sr-body {
   margin: 20px 50px;
-  /* grid-auto-rows: 33%; */
+}
+
+.sr-animals {
+  width: 60%;
+  display: grid;
+  float:left;
   grid-template-columns: repeat(3, 1fr);
+  margin-right: 5%;
 }
 
 .sr-main {
-  margin: 50px auto;
-  width: 50%;
+  width: 35%;
   font-size:2vw;
 }
 
@@ -353,6 +357,16 @@ pre {
   margin: 50px;
   text-align: center;
   font-size:3vw;
+}
+
+@media only screen and (max-width: 768px) {
+  /* For mobile phones: */
+  [class*="sr-animals"] {
+    width: 100%;
+  }
+  [class*="sr-main"] {
+    width: 100%;
+  }
 }
 
 #summary-table {
