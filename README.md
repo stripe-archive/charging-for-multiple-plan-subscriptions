@@ -4,9 +4,7 @@ This sample shows how to create a customer and subscribe them to multiple flat r
 [Stripe Billing](https://stripe.com/billing). For step by step directions showing how to
 implement this, use the [Stripe Billing quickstart](https://stripe.com/docs/billing/quickstart) (you may also find [Working with Multiple Plans per Subscription](https://stripe.com/docs/billing/subscriptions/multiplan) helpful).
 
-A quick screenshot of the demo view:
-![Sample UI to purchase a subscription consisting of multiple plans](./ui-before-purchase.png)
-![Sample UI after a successful purchase](./ui-after-purchase.png)
+![Purchase demo](./petting-zoo-demo.gif)
 
 Features:
 
