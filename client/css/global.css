@@ -41,13 +41,13 @@ h1 {
 h2 {
   font-size:3vw;
 }
+h3 {
+  font-size: 2vw;
+}
 h4 {
   font-weight: 500;
   font-size: 1.3vw;
   color: var(--gray-light);
-}
-h3 {
-  font-size: 2vw;
 }
 
 /* Layout */
