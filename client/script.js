@@ -118,15 +118,15 @@ var updateSummaryTable = function() {
     orderSummary.innerHTML = '';
     preface = '';
     if (selectedPlans.length == 0) {
-      preface = 'No products selected';
+      preface = 'No animals selected';
     } else {
       preface = 'Prices listed correspond to a concurrent monthly susbcription';
 
       for (var i = 0; i < selectedPlans.length; i++) {
         orderSummary.innerHTML += buildOrderSummaryRow('summary-product', selectedPlans[i].title, selectedPlans[i].price);
       }
-      orderSummary.innerHTML += buildOrderSummaryRow('summary-subtotal', 'Subtotal', subtotal);
       if (discount>0){
+        orderSummary.innerHTML += buildOrderSummaryRow('summary-subtotal', 'Subtotal', subtotal);
         orderSummary.innerHTML += buildOrderSummaryRow('summary-discount', 'Discount', discount);
       }
       orderSummary.innerHTML += buildOrderSummaryRow('summary-total', 'Total', total);
@@ -293,7 +293,6 @@ function toggleAnimal(id){
 /* Shows a success / error message when the payment is complete */
 var orderComplete = function(subscription) {
   var subscriptionJson = JSON.stringify(subscription, null, 2);
-  var status = subscription.status || 'incomplete';
   document.querySelectorAll('.payment-view').forEach(function(view) {
     view.classList.add('hidden');
   });

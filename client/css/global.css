@@ -40,6 +40,7 @@ h1 {
 }
 h2 {
   font-size:3vw;
+  padding: 0px;
 }
 h3 {
   font-size: 2vw;
@@ -65,6 +66,19 @@ h4 {
 }
 .sr-header {
   margin-bottom: 32px;
+}
+.sr-banner {
+  padding: 0.5vw;
+  border-radius: 6px;
+  background-color: #00cc00;
+  text-align: center;
+}
+.sr-instructions {
+  font-size: 2vw;
+  line-height: 2.5vw;
+  margin-left: 15%;
+  margin-right: 15%;
+  margin-bottom: 20px;
 }
 .sr-payment-summary {
   margin-bottom: 20px;
@@ -328,7 +342,8 @@ pre {
   border: 1px solid rgb(232, 232, 232);
   border-radius: 6px;
   text-align: center;
-  display:inline-block
+  display:inline-block;
+  cursor: pointer;
 }
 
 .sr-animal-text {
@@ -336,6 +351,7 @@ pre {
   font-size: 1.5vw;
   font-family: "Courier New";
   font-weight: bold;
+  cursor: none;
 }
 
 .sr-animal-emoji {
@@ -367,7 +383,7 @@ pre {
 }
 
 .sr-title {
-  margin: 5%;
+  margin: 2%;
   text-align: center;
 }
 
