@@ -19,10 +19,10 @@
     <div class="sr-body">
         <div id="sr-animals" class="sr-animals"></div>
         <div class="sr-main">
-            <div
-                <h3>Your Subscription</h3>
-                <div id="summary-table">
-                </div>
+            <div class="sr-summary">
+                <h3>Purchase Summary</h3>
+                <div id="summary-preface" class="sr-legal-text left"></div>
+                <div id="summary-table" class="summary-table"></div>
             </div>
             <div class="sr-payment-form payment-view">
                 <h3>Payment details</h3>
@@ -39,20 +39,15 @@
                 </div>
                 <button id="submit">Subscribe</button>
                 <div class="sr-legal-text">
-                    Your card will be immediately charged.
+                    Your card will be immediately charged
                 </div>
             </div>
-            <div class="sr-payment-summary hidden completed-view">
-                <h1>Your subscription is <span class="order-status"></span></h1>
-                <h4>
-                    View subscription response:</a>
-                </h4>
-            </div>
-            <div class="sr-section hidden completed-view">
-                <div class="sr-callout">
-                    <pre>
 
-                </pre>
+            <div class="sr-section hidden completed-view">
+                <h3 id="order-status"></h3>
+                <h4>View subscription response:</a></h4>
+                <div class="sr-callout">
+                    <pre id="request-json"></pre>
                 </div>
                 <button onclick="window.location.href='/'">Restart demo</button>
             </div>

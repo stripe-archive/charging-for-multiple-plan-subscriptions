@@ -38,10 +38,16 @@ h1 {
   font-size: 27px;
   color: var(--headline-color);
 }
+h2 {
+  font-size:3vw;
+}
 h4 {
   font-weight: 500;
-  font-size: 14px;
+  font-size: 1.3vw;
   color: var(--gray-light);
+}
+h3 {
+  font-size: 2vw;
 }
 
 /* Layout */
@@ -87,9 +93,13 @@ h4 {
 .sr-legal-text {
   color: var(--gray-light);
   text-align: center;
-  font-size: 13px;
+  font-size: 1.3vw;
   line-height: 17px;
-  margin-top: 12px;
+  margin-top: 1vw;
+}
+.sr-legal-text.left {
+  text-align: left;
+  margin-bottom: 2vw;
 }
 .sr-field-error {
   color: var(--accent-color);
@@ -124,6 +134,7 @@ input[type='text'] {
   -moz-appearance: none;
   -webkit-appearance: none;
   appearance: none;
+  font-size: 16px;
 }
 .sr-input:focus,
 input[type='text']:focus,
@@ -322,8 +333,9 @@ pre {
 
 .sr-animal-text {
   color: rgb(153, 153, 153);
-  font-size: 2vw;
-  font: small-caps bold 24px/1 sans-serif;
+  font-size: 1.5vw;
+  font-family: "Courier New";
+  font-weight: bold;
 }
 
 .sr-animal-emoji {
@@ -345,67 +357,65 @@ pre {
   display: grid;
   float:left;
   grid-template-columns: repeat(3, 1fr);
-  margin-right: 5%;
+  margin-right: 3vw;
 }
 
 .sr-main {
   width: 35%;
   font-size:2vw;
+  float: right;
 }
 
 .sr-title {
-  margin: 50px;
+  margin: 5%;
   text-align: center;
-  font-size:3vw;
 }
 
-@media only screen and (max-width: 768px) {
-  /* For mobile phones: */
-  [class*="sr-animals"] {
+.restart-demo {
+  text-align: center;
+}
+
+/* Responsiveness */
+@media (max-width: 720px) {
+  .sr-animals {
+    width: 100%;
+    margin-bottom: 8vw;
+  }
+
+  .sr-main {
     width: 100%;
   }
-  [class*="sr-main"] {
-    width: 100%;
+
+  .summary-table {
+    width: auto;
   }
 }
 
-#summary-table {
+.sr-summary {
+  margin-bottom: 8vw;
+  font-size: 1.5vw;
+}
+
+.summary-table {
   width: 100%;
   display: grid;
-  margin-top: 10px;
-  margin-bottom: 10px;
+  margin-top: 3vw;
   grid-template-columns: 70% 30%;
 }
 
-.summary-title {
-  font-size: 1.5vw;
-  vertical-align: middle;
-}
-
-.summary-price {
-  font-size: 1.5vw;
-  vertical-align: middle;
-  text-align:right;
-}
-
-.summary-subtotal {
-  margin-top: 20px;
+.summary-subtotal,
+.summary-total {
+  margin-top: 2vw;
 }
 
 .summary-total {
-  margin-top: 20px;
   font-weight: bold;
 }
 
-.summary-subtotal.summary-title {
-  text-align:right;
-}
-
-.summary-discount.summary-title {
-  text-align:right;
-}
-
-.summary-total.summary-title {
+.summary-price,
+.summary-subtotal,
+.summary-discount,
+.summary-total {
   text-align:right;
 }
 
@@ -428,10 +438,6 @@ pre {
 
   .sr-content {
     display: none;
-  }
-
-  .sr-main {
-    width: 100%;
   }
 }
 

@@ -107,31 +107,47 @@ var updateSummaryTable = function() {
   var discount = discountPercent * subtotal;
   var total = subtotal - discount;
 
-  var displayPriceDollarsPerMonth = function(price) {
-    return '$' + Math.round(price / 100.0) + '/mo';
-  };
-
   var orderSummary = document.getElementById('summary-table');
   if (orderSummary) {
     var buildOrderSummaryRow = function(rowClass, desc, amountCents) {
         return `
-          <div class="summary-title ${rowClass}">${desc}</div>
-          <div class="summary-price ${rowClass}">${displayPriceDollarsPerMonth(amountCents)}</div>
+          <div class="summary-title ${rowClass}">${capitalize(desc)}</div>
+          <div class="summary-price ${rowClass}">${getPriceDollars(amountCents)}</div>
         `;
     };
     orderSummary.innerHTML = '';
+    preface = '';
     if (selectedPlans.length == 0) {
-      orderSummary.innerHTML = 'No products selected';
+      preface = 'No products selected';
     } else {
+      preface = 'Prices listed correspond to a concurrent montly susbcription';
+
       for (var i = 0; i < selectedPlans.length; i++) {
         orderSummary.innerHTML += buildOrderSummaryRow('summary-product', selectedPlans[i].title, selectedPlans[i].price);
       }
       orderSummary.innerHTML += buildOrderSummaryRow('summary-subtotal', 'Subtotal', subtotal);
-      orderSummary.innerHTML += buildOrderSummaryRow('summary-discount', 'Discount', discount);
+      if (discount>0){
+        orderSummary.innerHTML += buildOrderSummaryRow('summary-discount', 'Discount', discount);
+      }
       orderSummary.innerHTML += buildOrderSummaryRow('summary-total', 'Total', total);
     }
+    document.getElementById('summary-preface').innerHTML = preface;
+
   }
 };
+
+function capitalize(name){
+  return name.charAt(0).toUpperCase() + name.slice(1);
+}
+
+function getPriceDollars(price, recurringBy=undefined) {
+  if (recurringBy===undefined){
+    return '$' + Math.round(price / 100.0);
+  }
+  else{
+    return '$' + Math.round(price / 100.0) + '/' + recurringBy;
+  }
+}
 
 function createCustomer(paymentMethod, cardholderEmail) {
   return fetch('/create-customer', {
@@ -244,8 +260,8 @@ function generateHtmlForPlansPage(){
             onclick="toggleAnimal(\'${id}\')">
               ${emoji}
           </div>
-          <div class="sr-animal-text">${animal}</div>
-          <div class="sr-animal-text">$${price / 100}/mo</div>
+          <div class="sr-animal-text">${capitalize(animal)}</div>
+          <div class="sr-animal-text">${getPriceDollars(price, 'month')}</div>
         </div>
       `;
     return result;
@@ -283,6 +299,13 @@ var orderComplete = function(subscription) {
   document.querySelectorAll('.completed-view').forEach(function(view) {
     view.classList.remove('hidden');
   });
-  document.querySelector('.order-status').textContent = status;
-  document.querySelector('pre').textContent = subscriptionJson;
+  if (subscription.hasOwnProperty('error')){
+    document.getElementById('order-status').textContent = 'Error creating subscription';
+    document.getElementById('order-status').style.color = 'red';
+  } else{
+    document.getElementById('order-status').textContent = 'Your subscription is ' + subscription.status;
+    document.getElementById('order-status').style.color = 'black';
+  }
+  document.getElementById('sr-animals').classList.add('hidden');
+  document.getElementById('request-json').textContent = subscriptionJson;
 };

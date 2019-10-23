@@ -1,4 +1,3 @@
-
 [
     {
         "planId": "stripe-example-bear",
@@ -19,25 +18,13 @@
         "emoji": "🐼"
     },
     {
-        "planId": "stripe-example-butterfly",
-        "price": 1000,
-        "title": "butterfly",
-        "emoji": "🦋"
-    },
-    {
-        "planId": "stripe-example-monkey",
-        "price": 20000,
-        "title": "monkey",
-        "emoji": "🐵"
-    },
-    {
         "planId": "stripe-example-dog",
         "price": 10000,
         "title": "dog",
         "emoji": "🐶"
     },
     {
-        "planId": "stripe-example-",
+        "planId": "stripe-example-cat",
         "price": 15000,
         "title": "cat",
         "emoji": "🐱"
@@ -53,24 +40,6 @@
         "price": 55000,
         "title": "horse",
         "emoji": "🐴"
-    },
-    {
-        "planId": "stripe-example-cow",
-        "price": 43000,
-        "title": "cow",
-        "emoji": "🐮"
-    },
-    {
-        "planId": "stripe-example-pig",
-        "price": 38000,
-        "title": "pig",
-        "emoji": "🐷"
-    },
-    {
-        "planId": "stripe-example-mouse",
-        "price": 1000,
-        "title": "mouse",
-        "emoji": "🐭"
     },
     {
         "planId": "stripe-example-rabbit",
