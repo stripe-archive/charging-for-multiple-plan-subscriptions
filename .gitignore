@@ -2,6 +2,7 @@
 .DS_Store
 .vscode
 server.log
+build.log
 server.pid
 
 # Node files
@@ -12,6 +13,7 @@ Gemfile.lock
 
 # Python files
 __pycache__
+.virtualenv
 venv
 
 # PHP files
