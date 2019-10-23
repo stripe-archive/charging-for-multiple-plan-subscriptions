@@ -102,7 +102,7 @@ function stop_process() {
     error "Could not stop server, pidfile not found."
     return 1
   fi
-  pid=$(cat $pidfile)
+  pid=$(cat "$pidfile")
   proc_count="$(ps ax | grep $pid |  grep -c "$proc_signature")"
   if [[ $proc_count -gt 0 ]]; then
     kill $pid

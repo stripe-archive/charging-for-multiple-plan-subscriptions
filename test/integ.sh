@@ -12,7 +12,7 @@
 ########
 
 
-REPO_ROOT=$(cd $(dirname $0)/.. && pwd)
+REPO_ROOT=$(cd $(dirname "$0")/.. && pwd)
 DOTENV_FILE="${REPO_ROOT}/.env"
 . "${REPO_ROOT}/scripts/utilities.sh"
 
@@ -119,7 +119,10 @@ EOF
   debug "${RESULT}"
   describe_api_result "${RESULT}" "$SERVER_NAME: create-customer API"
   echo "${RESULT}" | jq -e .error > /dev/null
-  FAILURES=$(( FAILURES + $?))
+  if [ $? -eq 0 ]; then
+    error "$SERVER_NAME: /create-customer returned an error: $(echo "${RESULT}" | jq .error)"
+    FAILURES=$(( FAILURES + 1))
+  fi
 
   ### fetch subscription
   read -d '' GET_SUBSCRIPTION_JSON << EOF
@@ -131,7 +134,10 @@ EOF
   RESULT=$(echo "${GET_SUBSCRIPTION_JSON}" | curl --max-time 10 --silent -d @- -H "Content-Type: application/json" http://localhost:4242/subscription)
   describe_api_result "${RESULT}" "$SERVER_NAME: fetch subscription"
   echo "${RESULT}" | jq -e .error > /dev/null
-  FAILURES=$(( FAILURES + $?))
+  if [ $? -eq 0 ]; then
+    error "$SERVER_NAME: /subscription returned an error: $(echo "${RESULT}" | jq .error)"
+    FAILURES=$(( FAILURES + 1))
+  fi
 
   ### cleanup subscription
   describe_api_result "$(delete_subscription "${SUBSRCIPTION_ID}")" "$SERVER_NAME: cleanup subscription"
@@ -146,9 +152,9 @@ EOF
 }
 
 function run_tests_on_all_servers() {
-  for server in ${REPO_ROOT}/server/*; do
+  for server in "${REPO_ROOT}"/server/*; do
     ## build and run server in background
-    if [[ ! -d $server ]]; then
+    if [[ ! -d "$server" ]]; then
       continue
     fi
 

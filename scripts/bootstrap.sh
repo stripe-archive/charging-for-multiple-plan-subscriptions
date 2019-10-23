@@ -8,8 +8,7 @@
 # Requirements: curl, jq, a Stripe account, and a well formed .env file (see ./README.md)
 ########
 
-
-REPO_ROOT=$(cd $(dirname $0)/.. && pwd)
+REPO_ROOT=$(cd "$(dirname "$0")/.." && pwd)
 DOTENV_FILE="${REPO_ROOT}/.env"
 . "${REPO_ROOT}/scripts/utilities.sh"
 
