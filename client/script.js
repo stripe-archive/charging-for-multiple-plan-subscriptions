@@ -293,7 +293,6 @@ function toggleAnimal(id){
 /* Shows a success / error message when the payment is complete */
 var orderComplete = function(subscription) {
   var subscriptionJson = JSON.stringify(subscription, null, 2);
-  var status = subscription.status || 'incomplete';
   document.querySelectorAll('.payment-view').forEach(function(view) {
     view.classList.add('hidden');
   });
