@@ -100,7 +100,7 @@ function run_tests_on_server() {
   {
     "email": "test@example.com",
     "payment_method": "$PAYMENT_METHOD_ID",
-    "plan_ids": ["stripe-example-lion", "stripe-example-tiger"]
+    "plan_ids": ["stripe-example-bear", "stripe-example-tiger"]
   }
 EOF
 
