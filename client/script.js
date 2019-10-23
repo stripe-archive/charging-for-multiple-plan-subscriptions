@@ -100,7 +100,7 @@ var updateSummaryTable = function() {
     var eligibleForDiscount = selectedPlans.length >= minPlansForDiscount;
     return eligibleForDiscount ? discountFactor : 0;
   };
-  
+
   var selectedPlans = getSelectedPlans();
   var discountPercent = computeDiscountPercent();
   var subtotal = computeSubtotal();
@@ -149,7 +149,11 @@ function createCustomer(paymentMethod, cardholderEmail) {
       return response.json();
     })
     .then(function(subscription) {
-      handleSubscription(subscription);
+      if (subscription.error) {
+        orderComplete(subscription);
+      } else {
+        handleSubscription(subscription);
+      }
     });
 }
 
@@ -272,12 +276,13 @@ function toggleAnimal(id){
 /* Shows a success / error message when the payment is complete */
 var orderComplete = function(subscription) {
   var subscriptionJson = JSON.stringify(subscription, null, 2);
+  var status = subscription.status || 'incomplete';
   document.querySelectorAll('.payment-view').forEach(function(view) {
     view.classList.add('hidden');
   });
   document.querySelectorAll('.completed-view').forEach(function(view) {
     view.classList.remove('hidden');
   });
-  document.querySelector('.order-status').textContent = subscription.status;
+  document.querySelector('.order-status').textContent = status;
   document.querySelector('pre').textContent = subscriptionJson;
 };
