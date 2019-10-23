@@ -3,6 +3,7 @@
 .vscode
 server.log
 build.log
+server.pid
 
 # Node files
 node_modules/

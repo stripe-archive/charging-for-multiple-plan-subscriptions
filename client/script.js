@@ -71,21 +71,36 @@ var getSelectedPlans = function() {
   return Object.values(allPlans).filter(plan => plan.selected);
 };
 
-var computeSubtotal = function() {
+var onSelectionChanged = function() {
   var selectedPlans = getSelectedPlans();
-  return selectedPlans
-    .map(plan => plan.price)
-    .reduce((plan1, plan2) => plan1 + plan2, 0);
-};
-
-var computeDiscountPercent = function() {
-  var selectedPlans = getSelectedPlans();
-  var eligibleForDiscount = selectedPlans.length >= minPlansForDiscount;
-  return eligibleForDiscount ? discountFactor : 0;
+  updateSummaryTable();
+  var showPaymentForm = selectedPlans.length == 0;
+  var paymentFormElts = document.querySelectorAll('.sr-payment-form');
+  if (showPaymentForm) {
+    paymentFormElts.forEach(function(elt) {
+      elt.classList.add('hidden');
+    });
+  } else {
+    paymentFormElts.forEach(function(elt) {
+      elt.classList.remove('hidden');
+    });
+  }
 };
 
 var updateSummaryTable = function() {
+  var computeSubtotal = function() {
+    var selectedPlans = getSelectedPlans();
+    return selectedPlans
+      .map(plan => plan.price)
+      .reduce((plan1, plan2) => plan1 + plan2, 0);
+  };
 
+  var computeDiscountPercent = function() {
+    var selectedPlans = getSelectedPlans();
+    var eligibleForDiscount = selectedPlans.length >= minPlansForDiscount;
+    return eligibleForDiscount ? discountFactor : 0;
+  };
+  
   var selectedPlans = getSelectedPlans();
   var discountPercent = computeDiscountPercent();
   var subtotal = computeSubtotal();
@@ -93,16 +108,16 @@ var updateSummaryTable = function() {
   var total = subtotal - discount;
 
   var displayPriceDollarsPerMonth = function(price) {
-    return '$' + Math.round(price / 100.0) + '/month';
+    return '$' + Math.round(price / 100.0) + '/mo';
   };
 
   var orderSummary = document.getElementById('summary-table');
   if (orderSummary) {
     var buildOrderSummaryRow = function(rowClass, desc, amountCents) {
-        return `<tr class="${rowClass}">
-          <td class="summary-title">${desc}</td>
-          <td class="summary-price">${displayPriceDollarsPerMonth(amountCents)}</td>
-        </tr>`;
+        return `
+          <div class="summary-title ${rowClass}">${desc}</div>
+          <div class="summary-price ${rowClass}">${displayPriceDollarsPerMonth(amountCents)}</div>
+        `;
     };
     orderSummary.innerHTML = '';
     if (selectedPlans.length == 0) {
@@ -111,9 +126,9 @@ var updateSummaryTable = function() {
       for (var i = 0; i < selectedPlans.length; i++) {
         orderSummary.innerHTML += buildOrderSummaryRow('summary-product', selectedPlans[i].title, selectedPlans[i].price);
       }
-      orderSummary.innerHTML += buildOrderSummaryRow('summary-calculation', 'Subtotal', subtotal);
-      orderSummary.innerHTML += buildOrderSummaryRow('summary-calculation', 'Discount', discount);
-      orderSummary.innerHTML += buildOrderSummaryRow('summary-calculation', 'Total', total);
+      orderSummary.innerHTML += buildOrderSummaryRow('summary-subtotal', 'Subtotal', subtotal);
+      orderSummary.innerHTML += buildOrderSummaryRow('summary-discount', 'Discount', discount);
+      orderSummary.innerHTML += buildOrderSummaryRow('summary-total', 'Total', total);
     }
   }
 };
@@ -209,7 +224,7 @@ function getPlans() {
         allPlans[plan.planId] = plan;
       });
       generateHtmlForPlansPage();
-      updateSummaryTable();
+      onSelectionChanged();
     });
 }
 
@@ -226,7 +241,7 @@ function generateHtmlForPlansPage(){
               ${emoji}
           </div>
           <div class="sr-animal-text">${animal}</div>
-          <div class="sr-animal-text">$${price / 100}</div>
+          <div class="sr-animal-text">$${price / 100}/mo</div>
         </div>
       `;
     return result;
@@ -249,7 +264,7 @@ function toggleAnimal(id){
     productElt.classList.remove('selected');
   }
 
-  updateSummaryTable();
+  onSelectionChanged();
 }
 
 /* ------- Post-payment helpers ------- */
