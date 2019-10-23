@@ -120,7 +120,7 @@ var updateSummaryTable = function() {
     if (selectedPlans.length == 0) {
       preface = 'No products selected';
     } else {
-      preface = 'Prices listed correspond to a concurrent montly susbcription';
+      preface = 'Prices listed correspond to a concurrent monthly susbcription';
 
       for (var i = 0; i < selectedPlans.length; i++) {
         orderSummary.innerHTML += buildOrderSummaryRow('summary-product', selectedPlans[i].title, selectedPlans[i].price);
