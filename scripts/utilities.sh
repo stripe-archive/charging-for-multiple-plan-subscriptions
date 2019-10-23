@@ -103,11 +103,11 @@ function stop_process() {
     return 1
   fi
   pid=$(cat "$pidfile")
-  proc_count="$(ps ax | grep $pid |  grep -c "$proc_signature")"
+  proc_count="$(ps ax | grep $pid |  egrep -ic "$proc_signature")"
   if [[ $proc_count -gt 0 ]]; then
     kill $pid
     sleep 1
-    proc_count="$(ps ax | grep $pid |  grep -c "$proc_signature")"
+    proc_count="$(ps ax | grep $pid |  egrep -ic "$proc_signature")"
     if [[ $proc_count -gt 0 ]]; then
      error "Could not shut down server. Check server logs."
       return 1

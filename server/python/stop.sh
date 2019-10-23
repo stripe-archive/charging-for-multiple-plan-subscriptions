@@ -6,5 +6,5 @@ TOP=$(cd "$(dirname "$0")" && pwd)
 cd "${TOP}"
 
 stop_process "${TOP}/server.pid" \
-  "python3 server.py"
+  "python3? server.py"
 exit $?

@@ -115,7 +115,7 @@ EOF
 
   ### create customer
   RESULT=$(echo ${CREATE_CUSTOMER_JSON} | curl --max-time 20 --silent -d @- -H "Content-Type: application/json" http://localhost:4242/create-customer)
-  SUBSRCIPTION_ID=$(echo "${RESULT}" | jq --raw-output .id)
+  SUBSCRIPTION_ID=$(echo "${RESULT}" | jq --raw-output .id)
   debug "${RESULT}"
   describe_api_result "${RESULT}" "$SERVER_NAME: create-customer API"
   echo "${RESULT}" | jq -e .error > /dev/null
@@ -127,7 +127,7 @@ EOF
   ### fetch subscription
   read -d '' GET_SUBSCRIPTION_JSON << EOF
 {
-  "subscriptionId": "${SUBSRCIPTION_ID}"
+  "subscriptionId": "${SUBSCRIPTION_ID}"
 }
 EOF
 
@@ -140,7 +140,7 @@ EOF
   fi
 
   ### cleanup subscription
-  describe_api_result "$(delete_subscription "${SUBSRCIPTION_ID}")" "$SERVER_NAME: cleanup subscription"
+  describe_api_result "$(delete_subscription "${SUBSCRIPTION_ID}")" "$SERVER_NAME: cleanup subscription"
 
   ## shutdown server
   if [ -f ./stop.sh ]; then
