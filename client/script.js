@@ -141,11 +141,12 @@ function capitalize(name){
 }
 
 function getPriceDollars(price, recurringBy=undefined) {
+  var pricePart = '$' + Math.round(price / 100.0);
   if (recurringBy===undefined){
-    return '$' + Math.round(price / 100.0);
+    return pricePart;
   }
   else{
-    return '$' + Math.round(price / 100.0) + '/' + recurringBy;
+    return pricePart + '/' + recurringBy;
   }
 }
 
@@ -299,12 +300,13 @@ var orderComplete = function(subscription) {
   document.querySelectorAll('.completed-view').forEach(function(view) {
     view.classList.remove('hidden');
   });
-  if (subscription.hasOwnProperty('error')){
-    document.getElementById('order-status').textContent = 'Error creating subscription';
-    document.getElementById('order-status').style.color = 'red';
-  } else{
-    document.getElementById('order-status').textContent = 'Your subscription is ' + subscription.status;
-    document.getElementById('order-status').style.color = 'black';
+  var orderStatus = document.getElementById('order-status');
+  if (subscription.hasOwnProperty('error')) {
+    orderStatus.textContent = 'Error creating subscription';
+    orderStatus.style.color = 'red';
+  } else {
+    orderStatus.textContent = 'Your subscription is ' + subscription.status;
+    orderStatus.style.color = 'black';
   }
   document.getElementById('sr-animals').classList.add('hidden');
   document.getElementById('request-json').textContent = subscriptionJson;
