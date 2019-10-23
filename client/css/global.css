@@ -403,6 +403,10 @@ pre {
   grid-template-columns: 70% 30%;
 }
 
+.summary-price {
+  text-align:right;
+}
+
 .summary-subtotal,
 .summary-total {
   margin-top: 2vw;
@@ -412,10 +416,9 @@ pre {
   font-weight: bold;
 }
 
-.summary-price,
-.summary-subtotal,
-.summary-discount,
-.summary-total {
+.summary-subtotal.summary-title,
+.summary-discount.summary-title,
+.summary-total.summary-title {
   text-align:right;
 }
 
