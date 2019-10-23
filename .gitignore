@@ -1,6 +1,8 @@
 .env
 .DS_Store
 .vscode
+server.log
+build.log
 
 # Node files
 node_modules/
@@ -10,6 +12,7 @@ Gemfile.lock
 
 # Python files
 __pycache__
+.virtualenv
 venv
 
 # PHP files
