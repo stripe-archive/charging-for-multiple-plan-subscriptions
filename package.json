@@ -1,10 +1,10 @@
 {
-  "name": "stripe-billing-quickstart-demo",
+  "name": "stripe-billing-multiplan-subscription-quickstart",
   "version": "1.0.0",
-  "description": "A Stripe Stripe Billing charging for subscriptions demo",
+  "description": "A Stripe Billing demo to create subscriptions for multiple billing plans",
   "main": "index.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "node server/node/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "stripe-demos",
