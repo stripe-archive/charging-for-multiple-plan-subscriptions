@@ -6,6 +6,11 @@ implement this, use the [Stripe Billing quickstart](https://stripe.com/docs/bill
 
 ![Purchase demo](./petting-zoo-demo.gif)
 
+# Demo
+
+Web: See the sample [live](https://8omeu.sse.codesandbox.io) in test mode or [fork](https://codesandbox.io/s/stripe-billing-multiplan-subscription-quickstart-8omeu) the Node implementation on CodeSandbox.
+iOS and Android: Clone this repo and run the sample server and app locally (see below).
+
 Features:
 
 - Collect card details 💳
