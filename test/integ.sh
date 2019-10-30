@@ -107,7 +107,7 @@ EOF
 
   ### fetch api key
   SERVER_KEY=$(curl --silent --max-time 3 http://localhost:4242/public-key | jq --raw-output .publicKey)
-  if [[ ! $SERVER_KEY = $STRIPE_PUBLIC_KEY ]]; then
+  if [[ ! $SERVER_KEY = $STRIPE_PUBLISHABLE_KEY ]]; then
     error "$SERVER_NAME: /public-key did not serve correct credentials."
     FAILURES=$(( FAILURES + 1 ))
     debug "${RESULT}"
