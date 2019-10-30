@@ -35,7 +35,7 @@ def get_index():
 @app.route('/public-key', methods=['GET'])
 def get_public_key():
     return jsonify(
-        publicKey=os.getenv('STRIPE_PUBLIC_KEY'),
+        publicKey=os.getenv('STRIPE_PUBLISHABLE_KEY'),
     )
 
 @app.route('/create-customer', methods=['POST'])

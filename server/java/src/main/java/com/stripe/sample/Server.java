@@ -59,9 +59,7 @@ public class Server {
 
     public static void main(String[] args) {
         port(4242);
-        String ENV_PATH = "../../";
-        Dotenv dotenv = Dotenv.configure().directory(ENV_PATH).load();
-
+        Dotenv dotenv = Dotenv.load();
         Stripe.apiKey = dotenv.get("STRIPE_SECRET_KEY");
 
         staticFiles.externalLocation(
@@ -75,7 +73,7 @@ public class Server {
         get("/public-key", (request, response) -> {
             response.type("application/json");
             JsonObject payload = new JsonObject();
-            payload.addProperty("publicKey", dotenv.get("STRIPE_PUBLIC_KEY"));
+            payload.addProperty("publicKey", dotenv.get("STRIPE_PUBLISHABLE_KEY"));
             return payload.toString();
         });
 

@@ -21,10 +21,10 @@ Features:
 
 This sample includes [5 server implementations](server/README.md) in our most popular languages. 
 
-If you want to run the sample locally, copy the .env.example file to your own .env file in this directory: 
+Copy the .env.example file into a file named .env in the folder of the server you want to use. For example:
 
 ```
-cp .env.example .env
+cp .env.example server/node/.env
 ```
 
 You will need a Stripe account with its own set of [API keys](https://stripe.com/docs/development#api-keys), as well as a .env file updated with your account's keys.
