@@ -21,15 +21,62 @@ Features:
 
 This sample includes [5 server implementations](server/README.md) in our most popular languages. 
 
+You will need a Stripe account with its own set of [API keys](https://stripe.com/docs/development#api-keys), as well as a .env file updated with your account's keys.
+
+You will also need to [add your phone number to your Stripe account](https://dashboard.stripe.com/phone-verification) in order to use the provided scripts (required in order to pass a credit card number directly to the API through curl).
+
+Follow the steps below to run locally.
+
+**1. Clone and configure the sample**
+
+The Stripe CLI is the fastest way to clone and configure a sample to run locally. 
+
+**Using the Stripe CLI**
+
+If you haven't already installed the CLI, follow the [installation steps](https://github.com/stripe/stripe-cli#installation) in the project README. The CLI is useful for cloning samples and locally testing webhooks and Stripe integrations.
+
+In your terminal shell, run the Stripe CLI command to clone the sample:
+
+```
+stripe samples create multiple-plan-subscriptions
+```
+
+The CLI will walk you through picking your integration type, server and client languages, and configuring your .env config file with your Stripe API keys. 
+
+**Installing and cloning manually**
+
+If you do not want to use the Stripe CLI, you can manually clone and configure the sample yourself:
+
+```
+git clone https://github.com/stripe-samples/charging-for-multiple-plan-subscriptions
+```
+
 Copy the .env.example file into a file named .env in the folder of the server you want to use. For example:
 
 ```
 cp .env.example server/node/.env
 ```
 
-You will need a Stripe account with its own set of [API keys](https://stripe.com/docs/development#api-keys), as well as a .env file updated with your account's keys.
+Go to the Stripe [developer dashboard](https://stripe.com/docs/development#api-keys) to find your API keys.
 
-You will also need to [add your phone number to your Stripe account](https://dashboard.stripe.com/phone-verification) in order to use the provided scripts (required in order to pass a credit card number directly to the API through curl).
+```
+STRIPE_PUBLISHABLE_KEY=<replace-with-your-publishable-key>
+STRIPE_SECRET_KEY=<replace-with-your-secret-key>
+```
+
+`CLIENT_DIR` tells the server where to the client files are located and does not need to be modified unless you move the server files.
+
+**2. Follow the server instructions on how to run:**
+
+Pick the server language you want and follow the instructions in the server folder README on how to run.
+
+For example, if you want to run the Node server in `using-webhooks`:
+
+```
+cd server/node # there's a README in this folder with instructions
+npm install
+npm start
+```
 
 After that, run the bootstrap script to create the billing objects referenced by the client and server within your account (uses the provided API keys from your .env file):
 
