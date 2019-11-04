@@ -182,7 +182,7 @@ function handleSubscription(subscription) {
     subscription.latest_invoice.payment_intent.status === 'requires_action'
   ) {
     stripe
-      .handleCardPayment(
+      .confirmCardPayment(
         subscription.latest_invoice.payment_intent.client_secret
       )
       .then(function(result) {
