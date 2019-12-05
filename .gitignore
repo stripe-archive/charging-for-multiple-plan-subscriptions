@@ -26,3 +26,10 @@ target/
 .classpath
 .factorypath
 .project
+
+# Tests
+scripts/
+test/
+build.sh
+start.sh 
+stop.sh
