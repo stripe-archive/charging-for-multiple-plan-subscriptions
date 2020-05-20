@@ -11,7 +11,7 @@
 
 ```
 python3 -m venv /path/to/new/virtual/environment
-source /path/to/new/virtual/environment/venv/bin/activate
+source /path/to/new/virtual/environment/bin/activate
 ```
 
 **TIP**: create the virtualenv in it's own directory, to keep it's contents separate from the rest of your code. 
@@ -34,6 +34,7 @@ pip install -r requirements.txt
 
 ```
 export FLASK_APP=server.py
+export FLASK_ENV=development
 python3 -m flask run --port=4242
 ```
 

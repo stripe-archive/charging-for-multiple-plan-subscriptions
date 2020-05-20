@@ -5,7 +5,6 @@ server.py
 Stripe Recipe.
 Python 3.6 or newer required.
 """
-
 import stripe
 import json
 import os
@@ -32,18 +31,41 @@ def get_index():
 
 # This endpoint is used by client in client/script.js
 # Returns relevant data about plans using the Stripe API
-@app.route('/public-key', methods=['GET'])
-def get_public_key():
-    return jsonify(
-        publicKey=os.getenv('STRIPE_PUBLISHABLE_KEY'),
-    )
+@app.route('/setup-page', methods=['GET'])
+def get_setup_page():
+    try:
+        animals = os.getenv('ANIMALS').split(",")
+        lookup_keys = []
+        for animal in animals:
+          lookup_keys.append(animal + '-monthly-usd')
+
+        prices = stripe.Price.list(lookup_keys=lookup_keys, expand=['data.product'])
+
+        products = []
+        for price in prices:
+            product = {
+              'price': { 'id': price['id'], 'unit_amount': price['unit_amount']},
+              'title': price['product']['metadata']['title'],
+              "emoji": price['product']['metadata']['emoji']
+            }
+            products.append(product)
+
+        # returns config information that is used by the client JavaScript to display the page. 
+        return jsonify({
+            'publicKey': os.getenv('STRIPE_PUBLISHABLE_KEY'),
+            'discountFactor': os.getenv('DISCOUNT_FACTOR'),
+            'minProductsForDiscount': os.getenv('MIN_PRODUCTS_FOR_DISCOUNT'),
+            'products': products
+        })
+    except Exception as e:
+        return jsonify(error=str(e)), 403
 
 @app.route('/create-customer', methods=['POST'])
 def create_customer():
     # Reads application/json and returns a response
     data = json.loads(request.data)
     paymentMethod = data['payment_method']
-    planIds = data['plan_ids']
+    priceIds = data['price_ids']
 
     # This creates a new Customer and attaches the PaymentMethod in one API call.
     # At this point, associate the ID of the Customer object with your
@@ -58,13 +80,13 @@ def create_customer():
 
     # In this example, we apply the coupon if the number of plans purchased
     # meets or exceeds the threshold.
-    eligibleForDiscount = len(planIds) >= MIN_PLANS_FOR_DISCOUNT
+    eligibleForDiscount = len(priceIds) >= int(os.getenv('MIN_PRODUCTS_FOR_DISCOUNT'))
     coupon = os.getenv('COUPON_ID') if eligibleForDiscount else None
 
     # Subscribe the user to the subscription created
     subscription = stripe.Subscription.create(
         customer=customer.id,
-        items=[{"plan": planId} for planId in planIds],
+        items=[{"price": priceId} for priceId in priceIds],
         expand=["latest_invoice.payment_intent"],
         coupon=coupon
     )

@@ -1,33 +1,49 @@
 require 'stripe'
 require 'sinatra'
 require 'dotenv'
+require 'sinatra/reloader' if development?
 
 # Replace if using a different env file or config
 
 Dotenv.load
 Stripe.api_key = ENV['STRIPE_SECRET_KEY']
 
-
 set :static, true
 set :public_folder, File.join(File.dirname(__FILE__), ENV['STATIC_DIR'])
 set :port, 4242
 set :show_exceptions, :after_handler
-
-# Number of coupons required to get a discount in this example.
-MIN_PLANS_FOR_DISCOUNT = 2
 
 get '/' do
   content_type 'text/html'
   send_file File.join(settings.public_folder, 'index.html')
 end
 
-# This endpoint is used by client in client/script.js
-# Returns relevant data about plans using the Stripe API
-get '/public-key' do
+get '/setup-page' do
   content_type 'application/json'
+
+  animals = ENV['ANIMALS'].split(",")
+
+  lookup_keys = Array.new()
+  animals.each do | animal |
+    lookup_keys.push(animal + "-monthly-usd")
+  end
+
+  prices = Stripe::Price.list({lookup_keys: lookup_keys, expand:['data.product']})
+
+  products = Array.new()
+  prices.each do | price|
+    product = Hash.new()
+    product[:price] = {id: price.id, unit_amount: price.unit_amount}
+    product[:title] = price.product.metadata['title']
+    product[:emoji] = price.product.metadata['emoji']
+    products.push(product)
+  end
 
   {
     'publicKey': ENV['STRIPE_PUBLISHABLE_KEY'],
+    'minProductsForDiscount': ENV['MIN_PRODUCTS_FOR_DISCOUNT'],
+    'discountFactor': ENV['DISCOUNT_FACTOR'],
+    'products': products,
   }.to_json
 end
 
@@ -48,15 +64,15 @@ post '/create-customer' do
 
   # In this example, we apply the coupon if the number of plans purchased
   # meets or exceeds the threshold.
-  planIds = data['plan_ids']
+  priceIds = data['price_ids']
   couponId = ENV['COUPON_ID']
-  eligibleForDiscount = planIds.length >= MIN_PLANS_FOR_DISCOUNT
-  coupon = eligibleForDiscount ? couponId : nil
+
+  eligibleForDiscount = priceIds.length >= ENV['MIN_PRODUCTS_FOR_DISCOUNT'].to_i
   subscription = Stripe::Subscription.create(
     customer: customer.id,
-    items: planIds.map{|planId| { plan: planId }}.compact,
+    items: priceIds.map{|priceId| { price: priceId }}.compact,
     expand: ['latest_invoice.payment_intent'],
-    coupon: coupon,
+    coupon: eligibleForDiscount ? couponId : nil,
   )
 
   subscription.to_json

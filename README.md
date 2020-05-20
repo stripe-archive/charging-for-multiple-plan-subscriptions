@@ -1,8 +1,8 @@
-# Stripe Billing subscribing a customer to multiple products
+# Stripe Billing sample subscribing a customer to multiple products
 
-This sample shows how to create a customer and subscribe them to multiple flat rate plans with
+This sample shows how to create a customer and subscribe them to multiple products with
 [Stripe Billing](https://stripe.com/billing). For step by step directions showing how to
-implement this, use the [Stripe Billing quickstart](https://stripe.com/docs/billing/quickstart) (you may also find [Working with Multiple Plans per Subscription](https://stripe.com/docs/billing/subscriptions/multiplan) helpful).
+implement this, use the [Stripe Billing quickstart](https://stripe.com/docs/billing/quickstart) (you may also find [Working with Multiple Products per Subscription](https://stripe.com/docs/billing/subscriptions/multiplan) helpful).
 
 ![Purchase demo](./petting-zoo-demo.gif)
 
@@ -68,9 +68,17 @@ STRIPE_SECRET_KEY=<replace-with-your-secret-key>
 
 **2. Follow the server instructions on how to run:**
 
-Pick the server language you want and follow the instructions in the server folder README on how to run.
+If you used the CLI to install the repo, follow the instructions in server/README.md
 
-For example, if you want to run the Node server in `using-webhooks`:
+```
+cd server # there's a README in this folder with instructions
+npm install
+npm start
+```
+
+If you manually cloned the repo, pick the server language you want and follow the instructions in the server folder README on how to run.
+
+For example, if you want to run the Node server:
 
 ```
 cd server/node # there's a README in this folder with instructions
@@ -78,17 +86,14 @@ npm install
 npm start
 ```
 
-After that, run the bootstrap script to create the billing objects referenced by the client and server within your account (uses the provided API keys from your .env file):
+**3. Generating Test Products and Prices:**
+You'll need to load the products, prices and coupon this sample uses into your Stripe account. These objects are defined in products-and-prices.json. Use the Stripe CLI [fixtures](https://stripe.com/docs/cli/fixtures) command to create them in the test mode within your Stripe account: 
 
 ```
-./scripts/bootstrap.sh
+stripe fixtures products-and-prices.json
 ```
 
-When finished, run the cleanup script to delete the generated objects:
-
-```
-./scripts/cleanup.sh
-```
+To delete the data you can either delete the objects individually using the [CLI](https://stripe.com/docs/cli/delete) or delete your test data from the developer's page within your [Dashboard](https://dashboard.stripe.com/test/developers)
 
 ## FAQ
 
@@ -108,3 +113,4 @@ A: We are always looking for new sample ideas, please email dev-samples@stripe.c
 - [@dylanw-stripe](https://github.com/dylanw-stripe)
 - [@markt-stripe](https://github.com/markt-stripe)
 - [@seanfitz-stripe](https://github.com/seanfitz-stripe)
+- [@dawn-stripe](https://github.com/dawn-stripe)
