@@ -1,0 +1,207 @@
+{
+  "_meta": {
+    "template_version": 0
+  },
+  "fixtures": [
+    {
+      "path":"v1/coupons",
+      "method":"post",
+      "params": {
+        "id":"STRIPE_SAMPLE_MULTI_PLAN_DISCOUNT_20OFF",
+        "percent_off":20,
+        "duration":"forever",
+        "name":"Discount for multiple purchases",
+        "metadata[min_items_for_discount]":2
+      }
+    },
+    {
+        "name": "bear_product",
+        "path": "/v1/products",
+        "method": "post",
+        "params": {
+        "name": "Petting Zoo Bear", 
+        "metadata[emoji]":"🐻",
+        "metadata[title]":"bear"
+        }
+    },
+    {
+        "path": "/v1/prices",
+        "method": "post",
+        "params": {
+           "product": "${bear_product:id}",
+           "unit_amount": 80000,
+           "currency": "usd",
+           "recurring[interval]":"month",
+           "lookup_key":"bear-monthly-usd"
+        }
+    },
+    {
+        "name": "koala_product",
+        "path": "/v1/products",
+        "method": "post",
+        "params": {
+        "name": "Petting Zoo Koala", 
+        "metadata[emoji]":"🐨",
+        "metadata[title]":"koala"
+        }
+    },
+    {
+        "path": "/v1/prices",
+        "method": "post",
+        "params": {
+           "product": "${koala_product:id}",
+           "unit_amount": 30000,
+           "currency": "usd",
+           "recurring[interval]":"month",
+           "lookup_key":"koala-monthly-usd"
+        }
+    },
+    {
+        "name": "panda_product",
+        "path": "/v1/products",
+        "method": "post",
+        "params": {
+        "name": "Petting Zoo Panda", 
+        "metadata[emoji]":"🐼",
+        "metadata[title]":"panda"
+        }
+    },
+    {
+        "path": "/v1/prices",
+        "method": "post",
+        "params": {
+           "product": "${panda_product:id}",
+           "unit_amount": 60000,
+           "currency": "usd",
+           "recurring[interval]":"month",
+           "lookup_key":"panda-monthly-usd"
+        }
+    },
+    {
+        "name": "dog_product",
+        "path": "/v1/products",
+        "method": "post",
+        "params": {
+        "name": "Petting Zoo Dog", 
+        "metadata[emoji]":"🐶",
+        "metadata[title]":"dog"
+        }
+    },
+    {
+        "path": "/v1/prices",
+        "method": "post",
+        "params": {
+           "product": "${dog_product:id}",
+           "unit_amount": 10000,
+           "currency": "usd",
+           "recurring[interval]":"month",
+           "lookup_key":"dog-monthly-usd"
+        }
+    },
+    {
+        "name": "cat_product",
+        "path": "/v1/products",
+        "method": "post",
+        "params": {
+        "name": "Petting Zoo Cat", 
+        "metadata[emoji]":"🐱",
+        "metadata[title]":"cat"
+        }
+    },
+    {
+        "path": "/v1/prices",
+        "method": "post",
+        "params": {
+           "product": "${cat_product:id}",
+           "unit_amount": 15000,
+           "currency": "usd",
+           "recurring[interval]":"month",
+           "lookup_key":"cat-monthly-usd"
+        }
+    },
+    {
+        "name": "tiger_product",
+        "path": "/v1/products",
+        "method": "post",
+        "params": {
+        "name": "Petting Zoo Tiger", 
+        "metadata[emoji]":"🐯",
+        "metadata[title]":"tiger"
+        }
+    },
+    {
+        "path": "/v1/prices",
+        "method": "post",
+        "params": {
+           "product": "${tiger_product:id}",
+           "unit_amount": 65000,
+           "currency": "usd",
+           "recurring[interval]":"month",
+           "lookup_key":"tiger-monthly-usd"
+        }
+    },
+    {
+        "name": "horse_product",
+        "path": "/v1/products",
+        "method": "post",
+        "params": {
+        "name": "Petting Zoo Horse", 
+        "metadata[emoji]":"🐴",
+        "metadata[title]":"horse"
+        }
+    },
+    {
+        "path": "/v1/prices",
+        "method": "post",
+        "params": {
+           "product": "${horse_product:id}",
+           "unit_amount": 55000,
+           "currency": "usd",
+           "recurring[interval]":"month",
+           "lookup_key":"horse-monthly-usd"
+        }
+    },
+    {
+        "name": "rabbit_product",
+        "path": "/v1/products",
+        "method": "post",
+        "params": {
+        "name": "Petting Zoo Rabbit", 
+        "metadata[emoji]":"🐰",
+        "metadata[title]":"rabbit"
+        }
+    },
+    {
+        "path": "/v1/prices",
+        "method": "post",
+        "params": {
+           "product": "${rabbit_product:id}",
+           "unit_amount": 5000,
+           "currency": "usd",
+           "recurring[interval]":"month",
+           "lookup_key":"rabbit-monthly-usd"
+        }
+    },
+    {
+        "name": "dragon_product",
+        "path": "/v1/products",
+        "method": "post",
+        "params": {
+        "name": "Petting Zoo Dragon", 
+        "metadata[emoji]":"🐲",
+        "metadata[title]":"dragon"
+        }
+    },
+    {
+        "path": "/v1/prices",
+        "method": "post",
+        "params": {
+           "product": "${dragon_product:id}",
+           "unit_amount":100000,
+           "currency": "usd",
+           "recurring[interval]":"month",
+           "lookup_key":"dragon-monthly-usd"
+        }
+    } 
+  ]
+}

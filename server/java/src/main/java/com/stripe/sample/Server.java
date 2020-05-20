@@ -7,10 +7,15 @@ import static spark.Spark.post;
 import static spark.Spark.staticFiles;
 
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
 import com.stripe.Stripe;
@@ -18,14 +23,18 @@ import com.stripe.exception.SignatureVerificationException;
 import com.stripe.model.Customer;
 import com.stripe.model.Event;
 import com.stripe.model.EventDataObjectDeserializer;
+import com.stripe.model.Price;
+import com.stripe.model.PriceCollection;
 import com.stripe.model.StripeObject;
 import com.stripe.model.Subscription;
 import com.stripe.net.Webhook;
+import com.stripe.param.CustomerCreateParams;
+import com.stripe.param.PriceListParams;
+import com.stripe.param.SubscriptionCreateParams;
 
 import io.github.cdimascio.dotenv.Dotenv;
 
 public class Server {
-    private final static Integer MIN_PLANS_FOR_DISCOUNT = 2;
     private static Gson gson = new Gson();
 
     static class CreatePaymentBody {
@@ -33,8 +42,8 @@ public class Server {
         String paymentMethod;
         @SerializedName("email")
         String email;
-        @SerializedName("plan_ids")
-        String[] planIds;
+        @SerializedName("price_ids")
+        String[] priceIds;
 
         public String getPaymentMethod() {
             return paymentMethod;
@@ -62,15 +71,39 @@ public class Server {
         staticFiles.externalLocation(
                 Paths.get(Paths.get("").toAbsolutePath().toString(), dotenv.get("STATIC_DIR")).normalize().toString());
 
-        exception(Exception.class, (exception, request, response) -> {
+        get("/setup-page", (request, response) -> {
             response.type("application/json");
-            response.body(String.format("{\"error\":{\"message\":\"%s\"}}", exception.getMessage()));
-        });
 
-        get("/public-key", (request, response) -> {
-            response.type("application/json");
+            List<String> animals = Arrays.asList(dotenv.get("ANIMALS").split(","));
+            List<String> lookup_keys = animals.stream()
+                .map(s -> s.concat("-monthly-usd"))
+                .collect(Collectors.toList());
+
+            PriceListParams params = PriceListParams.builder()
+                .addAllLookupKeys(lookup_keys)
+                .addAllExpand(Arrays.asList("data.product"))
+                .build();
+
+            PriceCollection prices = Price.list(params);
+
+            JsonArray products = new JsonArray();
+            for (Price price : prices.getData()) {
+                JsonObject product = new JsonObject();
+                JsonObject priceInfo = new JsonObject();
+                priceInfo.addProperty("id", price.getId());
+                priceInfo.addProperty("unit_amount", price.getUnitAmount());
+                product.add("price", priceInfo);
+                product.addProperty("title", price.getProductObject().getMetadata().get("title"));
+                product.addProperty("emoji", price.getProductObject().getMetadata().get("emoji"));
+                products.add(product);
+            }
+
             JsonObject payload = new JsonObject();
             payload.addProperty("publicKey", dotenv.get("STRIPE_PUBLISHABLE_KEY"));
+            payload.addProperty("minProductsForDiscount", dotenv.get("MIN_PRODUCTS_FOR_DISCOUNT"));
+            payload.addProperty("discountFactor", dotenv.get("DISCOUNT_FACTOR"));
+            payload.add("products", products);
+
             return payload.toString();
         });
 
@@ -78,38 +111,43 @@ public class Server {
             response.type("application/json");
 
             CreatePaymentBody postBody = gson.fromJson(request.body(), CreatePaymentBody.class);
-            // This creates a new Customer and attaches the PaymentMethod in one API call.
-            Map<String, Object> customerParams = new HashMap<String, Object>();
-            customerParams.put("payment_method", postBody.getPaymentMethod());
-            customerParams.put("email", postBody.getEmail());
-            Map<String, String> invoiceSettings = new HashMap<String, String>();
-            invoiceSettings.put("default_payment_method", postBody.getPaymentMethod());
-            customerParams.put("invoice_settings", invoiceSettings);
+
+            CustomerCreateParams customerParams =
+              CustomerCreateParams.builder()
+                .setPaymentMethod(postBody.getPaymentMethod())
+                .setEmail(postBody.getEmail())
+                .setInvoiceSettings(
+                  CustomerCreateParams.InvoiceSettings.builder()
+                    .setDefaultPaymentMethod(postBody.getPaymentMethod())
+                    .build())
+                .build();
+
             Customer customer = Customer.create(customerParams);
 
-            // Subscribe customer to a plan
-            Map<String, Object> items = new HashMap<>();
-            for (int i = 0; i < postBody.planIds.length; i++) {
-                Map<String, Object> item = new HashMap<>();
-                item.put("plan", postBody.planIds[i]);
-                items.put(Integer.toString(i), item);
+            // Build the collection of products based on what the customer choose
+            List<SubscriptionCreateParams.Item> items = new ArrayList<SubscriptionCreateParams.Item>();
+            for (String priceId : postBody.priceIds) {
+                items.add(SubscriptionCreateParams.Item.builder()
+                    .setPrice(priceId)
+                    .build());
             }
 
-            Map<String, Object> expand = new HashMap<>();
-            expand.put("0", "latest_invoice.payment_intent");
-            Map<String, Object> params = new HashMap<>();
-            params.put("customer", customer.getId());
-            params.put("items", items);
-            params.put("expand", expand);
-
-            String couponId = dotenv.get("COUPON_ID");
-            Boolean eligibleForDiscount = postBody.planIds.length >= MIN_PLANS_FOR_DISCOUNT;
-            if (eligibleForDiscount) {
-                params.put("coupon", couponId);
+            String couponId = null;
+            if (items.size() >= Integer.parseInt(dotenv.get("MIN_PRODUCTS_FOR_DISCOUNT")))
+            {
+              couponId = dotenv.get("COUPON_ID");
             }
 
-            Subscription subscription = Subscription.create(params);
+            //Subscribe the customer
+            SubscriptionCreateParams subscriptionParams =
+              SubscriptionCreateParams.builder()
+                .setCustomer(customer.getId())
+                .setCoupon(couponId)
+                .addAllExpand(Arrays.asList("latest_invoice.payment_intent"))
+                .addAllItem(items)
+                .build();
 
+            Subscription subscription = Subscription.create(subscriptionParams);
             return subscription.toJson();
         });
 

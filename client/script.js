@@ -1,7 +1,7 @@
 var stripe;
-var allPlans = {};
-var minPlansForDiscount = 2;
-var discountFactor = 0.2;
+var allProducts = {};
+var minProductsForDiscount;
+var discountFactor;
 
 var stripeElements = function(publicKey) {
   stripe = Stripe(publicKey);
@@ -67,14 +67,14 @@ var pay = function(stripe, card) {
     });
 };
 
-var getSelectedPlans = function() {
-  return Object.values(allPlans).filter(plan => plan.selected);
+var getSelectedProducts = function() {
+  return Object.values(allProducts).filter(product => product.selected);
 };
 
 var onSelectionChanged = function() {
-  var selectedPlans = getSelectedPlans();
+  var selectedProducts = getSelectedProducts();
   updateSummaryTable();
-  var showPaymentForm = selectedPlans.length == 0;
+  var showPaymentForm = selectedProducts.length == 0;
   var paymentFormElts = document.querySelectorAll('.sr-payment-form');
   if (showPaymentForm) {
     paymentFormElts.forEach(function(elt) {
@@ -89,19 +89,19 @@ var onSelectionChanged = function() {
 
 var updateSummaryTable = function() {
   var computeSubtotal = function() {
-    var selectedPlans = getSelectedPlans();
-    return selectedPlans
-      .map(plan => plan.price)
-      .reduce((plan1, plan2) => plan1 + plan2, 0);
+    var selectedProducts = getSelectedProducts();
+    return selectedProducts
+      .map(product => product.price.unit_amount)
+      .reduce((product1, product2) => product1 + product2, 0);
   };
 
   var computeDiscountPercent = function() {
-    var selectedPlans = getSelectedPlans();
-    var eligibleForDiscount = selectedPlans.length >= minPlansForDiscount;
+    var selectedProducts = getSelectedProducts();
+    var eligibleForDiscount = selectedProducts.length >= minProductsForDiscount;
     return eligibleForDiscount ? discountFactor : 0;
   };
 
-  var selectedPlans = getSelectedPlans();
+  var selectedProducts = getSelectedProducts();
   var discountPercent = computeDiscountPercent();
   var subtotal = computeSubtotal();
   var discount = discountPercent * subtotal;
@@ -117,13 +117,13 @@ var updateSummaryTable = function() {
     };
     orderSummary.innerHTML = '';
     preface = '';
-    if (selectedPlans.length == 0) {
+    if (selectedProducts.length == 0) {
       preface = 'No animals selected';
     } else {
       preface = 'Prices listed correspond to a recurrent monthly susbcription';
 
-      for (var i = 0; i < selectedPlans.length; i++) {
-        orderSummary.innerHTML += buildOrderSummaryRow('summary-product', selectedPlans[i].title, selectedPlans[i].price);
+      for (var i = 0; i < selectedProducts.length; i++) {
+        orderSummary.innerHTML += buildOrderSummaryRow('summary-product', selectedProducts[i].title, selectedProducts[i].price.unit_amount);
       }
       if (discount>0){
         orderSummary.innerHTML += buildOrderSummaryRow('summary-subtotal', 'Subtotal', subtotal);
@@ -159,7 +159,7 @@ function createCustomer(paymentMethod, cardholderEmail) {
     body: JSON.stringify({
       email: cardholderEmail,
       payment_method: paymentMethod,
-      plan_ids: getSelectedPlans().map(plan => plan.planId)
+      price_ids: getSelectedProducts().map(product => product.price.id)
     })
   })
     .then(function(response) {
@@ -214,8 +214,8 @@ function confirmSubscription(subscriptionId) {
     });
 }
 
-function getPublicKey() {
-  return fetch('/public-key', {
+function init() {
+  return fetch('/setup-page', {
     method: 'get',
     headers: {
       'Content-Type': 'application/json'
@@ -226,34 +226,24 @@ function getPublicKey() {
     })
     .then(function(json) {
       stripeElements(json.publicKey);
-    });
-}
-
-function getPlans() {
-  return fetch('/plans.json', {
-    method: 'get',
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  })
-    .then(function(response) {
-      return response.json();
-    })
-    .then(function(json) {
-      json.forEach(function(plan) {
-        plan.selected = false;
-        allPlans[plan.planId] = plan;
+      coupon = json.coupon;
+      minProductsForDiscount = json.minProductsForDiscount;
+      discountFactor = json.discountFactor;
+      products = json.products;
+      products.forEach(function(product) {
+        product.selected = false;
+        allProducts[product.price.id] = product;
       });
-      generateHtmlForPlansPage();
+      generateHtmlForPricingPage();
       onSelectionChanged();
     });
 }
 
-getPublicKey();
-getPlans();
+init();
 
-function generateHtmlForPlansPage(){
-  function generateHtmlForSinglePlan(id, animal, price, emoji){
+
+function generateHtmlForPricingPage(){
+  function generateHtmlForSingleProduct(id, animal, price, emoji){
     result = `
         <div class="sr-animal">
           <div class="sr-animal-emoji"
@@ -268,17 +258,17 @@ function generateHtmlForPlansPage(){
     return result;
   }
   var html = '';
-  Object.values(allPlans).forEach((plan) => {
-    html += generateHtmlForSinglePlan(plan.planId, plan.title, plan.price, plan.emoji);
+  Object.values(allProducts).forEach((product) => {
+    html += generateHtmlForSingleProduct(product.price.id, product.title, product.price.unit_amount, product.emoji);
   });
 
   document.getElementById('sr-animals').innerHTML += html;
 }
 
 function toggleAnimal(id){
-  allPlans[id].selected = !allPlans[id].selected;
+  allProducts[id].selected = !allProducts[id].selected;
   var productElt = document.getElementById(id);
-  if (allPlans[id].selected) {
+  if (allProducts[id].selected) {
     productElt.classList.add('selected');
   }
   else {

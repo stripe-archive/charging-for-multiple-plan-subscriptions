@@ -12,8 +12,6 @@ require './config.php';
 
 $app = new \Slim\App;
 
-$MIN_PLANS_FOR_DISCOUNT = 2;
-
 // Instantiate the logger as a dependency
 $container = $app->getContainer();
 $container['logger'] = function ($c) {
@@ -51,11 +49,45 @@ $app->get('/', function (Request $request, Response $response, array $args) {
   return $response->write(file_get_contents('../../client/index.html'));
 });
 
-$app->get('/public-key', function (Request $request, Response $response, array $args) {
-  $pub_key = getenv('STRIPE_PUBLISHABLE_KEY');
-  
-  // Send publishable key details to client
-  return $response->withJson(array('publicKey' => $pub_key));
+$app->get('/setup-page', function (Request $request, Response $response, array $args) {
+  $animals = explode(',', getenv('ANIMALS'));
+  $lookup_keys = [];
+
+  foreach($animals as $animal)
+  {
+    array_push($lookup_keys, $animal . "-monthly-usd");
+  }
+
+  $prices = \Stripe\Price::all([
+    "lookup_keys" => $lookup_keys,
+    "expand" =>['data.product']
+  ]);
+
+  $products = [];
+
+  foreach($prices as $price)
+  {
+
+    $logger->info('product ' . print_r($price['product']['metadata'], TRUE));
+    $product = [
+      'price' => [
+        'id' => $price['id'],
+        'unit_amount' => $price['unit_amount']
+      ],
+      'title' => $price['product']['metadata']['title'],
+      'emoji' => $price['product']['metadata']['emoji']
+    ];
+    array_push($products, $product);
+  }
+
+
+  // Send publishable key and other info to client
+  return $response->withJson(array(
+    'publicKey' => getenv('STRIPE_PUBLISHABLE_KEY'),
+    'minProductsForDiscount' => getenv('MIN_PRODUCTS_FOR_DISCOUNT'),
+    'discountFactor' => getenv('DISCOUNT_FACTOR'),
+    'products' => $products
+    ));
 });
 
 $app->post('/create-customer', function (Request $request, Response $response, array $args) {
@@ -72,12 +104,11 @@ $app->post('/create-customer', function (Request $request, Response $response, a
     ]
   ]);
 
-  global $MIN_PLANS_FOR_DISCOUNT;
-  $eligibleForDiscount = count($body->plan_ids) >= $MIN_PLANS_FOR_DISCOUNT;
+  $eligibleForDiscount = count($body->price_ids) >= intval(getenv('MIN_PLANS_FOR_DISCOUNT'));
   $couponId = $eligibleForDiscount ? getenv('COUPON_ID') : null;
   $subscription = \Stripe\Subscription::create([
     "customer" => $customer['id'],
-    "items" => array_map(function ($planId) { return [ "plan" => $planId ]; }, $body->plan_ids),
+    "items" => array_map(function ($priceId) { return [ "price" => $priceId ]; }, $body->price_ids),
     "expand" => ['latest_invoice.payment_intent'],
     "coupon" => $couponId
   ]);
@@ -89,7 +120,6 @@ $app->post('/subscription', function (Request $request, Response $response, arra
   $body = json_decode($request->getBody());
 
   $subscription = \Stripe\Subscription::retrieve($body->subscriptionId);
-
 
   return $response->withJson($subscription);
 });

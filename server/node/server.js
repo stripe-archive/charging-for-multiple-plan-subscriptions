@@ -5,7 +5,6 @@ const { resolve } = require("path");
 const env = require("dotenv").config({ path: "./.env" });
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
-const MIN_PLANS_FOR_DISCOUNT = 2;
 app.use(express.static(process.env.STATIC_DIR));
 
 app.use(
@@ -29,9 +28,34 @@ app.get("/", (req, res) => {
   res.sendFile(path);
 });
 
-app.get("/public-key", (req, res) => {
-  res.send({ publicKey: process.env.STRIPE_PUBLISHABLE_KEY });
-});
+app.get("/setup-page", asyncMiddleware(async (req, res, next) => {
+    animals = process.env.ANIMALS.split(',');
+
+    var lookup_keys = [];
+    animals.forEach(animal => lookup_keys.push(animal + "-monthly-usd"));
+
+    const prices = await stripe.prices.list({
+      lookup_keys: lookup_keys,
+      expand:["data.product"]});
+
+    var products = [];
+    prices.data.forEach(price => {
+      var product = {
+        price: {id: price.id, unit_amount: price.unit_amount},
+        title: price.product.metadata.title,
+        emoji: price.product.metadata.emoji
+      };
+      products.push(product);
+    });
+
+    res.send({
+      publicKey: process.env.STRIPE_PUBLISHABLE_KEY,
+      minProductsForDiscount: process.env.MIN_PRODUCTS_FOR_DISCOUNT,
+      discountFactor: process.env.DISCOUNT_FACTOR,
+      products: products
+    });
+  })
+);
 
 app.post(
   "/create-customer",
@@ -48,16 +72,16 @@ app.post(
 
     // In this example, we apply the coupon if the number of plans purchased
     // meets or exceeds the threshold.
-    planIds = req.body.plan_ids;
-    const eligibleForDiscount = planIds.length >= MIN_PLANS_FOR_DISCOUNT;
+    priceIds = req.body.price_ids;
+    const eligibleForDiscount = priceIds.length >= process.env.MIN_PRODUCTS_FOR_DISCOUNT;
     const coupon = eligibleForDiscount ? process.env.COUPON_ID : null;
 
     // At this point, associate the ID of the Customer object with your
     // own internal representation of a customer, if you have one.
     const subscription = await stripe.subscriptions.create({
       customer: customer.id,
-      items: planIds.map(planId => {
-        return { plan: planId };
+      items: priceIds.map(priceId => {
+        return { price: priceId };
       }),
       expand: ["latest_invoice.payment_intent"],
       coupon: coupon
