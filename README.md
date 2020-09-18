@@ -21,7 +21,7 @@ Features:
 
 This sample includes [5 server implementations](server/README.md) in our most popular languages. 
 
-You will need a Stripe account with its own set of [API keys](https://stripe.com/docs/development#api-keys), as well as a .env file updated with your account's keys.
+You will need a Stripe account with its own set of [API keys](https://stripe.com/docs/development/quickstart#api-keys), as well as a .env file updated with your account's keys.
 
 You will also need to [add your phone number to your Stripe account](https://dashboard.stripe.com/phone-verification) in order to use the provided scripts (required in order to pass a credit card number directly to the API through curl).
 
@@ -57,7 +57,7 @@ Copy the .env.example file into a file named .env in the folder of the server yo
 cp .env.example server/node/.env
 ```
 
-Go to the Stripe [developer dashboard](https://stripe.com/docs/development#api-keys) to find your API keys.
+Go to the Stripe [developer dashboard](https://stripe.com/docs/development/quickstart#api-keys) to find your API keys.
 
 ```
 STRIPE_PUBLISHABLE_KEY=<replace-with-your-publishable-key>
