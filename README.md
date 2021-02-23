@@ -110,6 +110,8 @@ If you have questions, comments, or need help with code, we're here to help:
 - on Stack Overflow at the [stripe-payments](https://stackoverflow.com/tags/stripe-payments/info) tag
 - by [email](mailto:support+github@stripe.com)
 
+Sign up to [stay updated with developer news](https://go.stripe.global/dev-digest).
+
 ## Author(s)
 
 - [@abhishek-stripe](https://github.com/abhishek-stripe)
