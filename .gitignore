@@ -1,6 +1,7 @@
 .env
 .DS_Store
-.vscode
+.vscode/*
+!.vscode/extensions.json
 server.log
 build.log
 server.pid
@@ -31,5 +32,5 @@ target/
 scripts/
 test/
 build.sh
-start.sh 
+start.sh
 stop.sh
