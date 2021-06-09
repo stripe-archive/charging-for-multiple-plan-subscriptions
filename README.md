@@ -1,3 +1,11 @@
+
+> <img src="https://stripe.dev/images/badges/archived.png" width="250">
+>
+> This project is deprecated and is no longer being actively maintained.
+>
+> Please see the [Subscription use cases](https://github.com/stripe-samples/subscription-use-cases) sample.
+
+
 # Stripe Billing sample subscribing a customer to multiple products
 
 This sample shows how to create a customer and subscribe them to multiple products with
